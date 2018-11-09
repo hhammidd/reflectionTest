@@ -7,7 +7,7 @@ import java.lang.reflect.Method;
 
 public class MainReflection {
     public static void main(String[] args) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, NoSuchFieldException {
-        Users users = new Users();
+        Users users =  new Users();
         users.setUserId(1);
         users.setUserName("hamid");
         //Map<String, Object> properties = BeanUtils.describe(users);
