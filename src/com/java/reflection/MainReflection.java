@@ -3,10 +3,11 @@ package com.java.reflection;
 import com.java.reflection.model.Users;
 import com.sun.xml.internal.ws.util.StringUtils;
 
+import javax.jws.soap.SOAPBinding;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MainReflection {
 
@@ -40,184 +41,96 @@ public class MainReflection {
         T objFromString = null;
         Method[] m = clazzToObj.getDeclaredMethods();
 
-        List<Object> objectInfo = new ArrayList<>();
+        List<Object> fieldNameList = new ArrayList<>();
+        List<Object> argFieldNewList = new ArrayList<>();
+        Map<String, Object> fieldInfoMap = new HashMap<>();
+
+        List<Map> objectInfo = new ArrayList<>();
 
         objectInfo = parseJson(jsonObj);
+        fieldInfoMap = objectInfo.get(0);
 
-        //TODO should take the value from above
-        Object argFieldNew = objectInfo.get(0);
-        String fieldName = (String) objectInfo.get(1);
+
+        System.out.println("start");
+
+        //fieldInfoMap = objectInfo.stream().map(x->x.keySet());
+        //Map<String, Object> resultField = objectInfo.stream().collect(Collectors.toMap(s->(List<String>) s.get("key"), s-> (List<Object>) s.get()));
+        //System.out.println(resultField);
+
+
+        System.out.println(argFieldNewList);
+        System.out.println(fieldNameList);
+        Object argFieldNew = new Object();
+
 
         for (Method e : m) {
             int nOfArgs = e.getParameterCount();
             String mName = e.getName();
 
+
             if (mName.startsWith("set") && Character.isUpperCase(mName.charAt(3))) {
+                // key is setUserName val is : hamid
+                //String getValOfSpecialKey = objectInfo.stream().map();
+                //String fieldNameOfMname = objectInfo.stream().map(x->x.keySet().contains(mName.substring(3)))
+                String fieldNameWithUpper = mName.substring(3);
+                String fieldName = fieldNameWithUpper.toLowerCase().charAt(0) + fieldNameWithUpper.substring(1);
+                System.out.println(fieldName);
+                Object argFielFromMap = new Object();
+
+                argFielFromMap =  objectInfo.stream().filter(entry-> entry.containsKey(fieldName));
+                argFielFromMap =  objectInfo.stream().filter(entry-> entry.containsKey(fieldName))
+                ;
+                System.out.println(argFielFromMap);
+
                 Class<?>[] paramTypeNew = e.getParameterTypes();
                 Method methodSetter = clazzToObj.getDeclaredMethod(mName,paramTypeNew[0]);
+
                 methodSetter.invoke(clazzObj, argFieldNew);
             }
         }
         return (T) clazzObj;
     }
 
-    private static List<Object> parseJson(String jsonObj) {
+    private static List<Map> parseJson(String jsonObj) {
 
         // { "A" :a, "B" : "b"} start test
-        String jsonStr = "{ \"Aaad\" :a, \"B\" : \"b\" , \"C\" : \"c\"}";
+        //String jsonStr = "{ \"Aaad\" :a, \"B\" : \"b\" , \"C\" : \"c\"}";
         // split ,
-
-
-        List<Object> objectInfo = new ArrayList<>();
-        Object argFileName = null;
-        String fieldName = "here";
-
-        // do the parser
-        int startIndexVal = 0;
-        int startIndexKey = 0;
-
-        if (startIndexKey == -1 ){
-            return null;
-        }
-
-        if (startIndexVal == -1){
-            return null;
-        }
-
         //TODO find all values here from JSON
-        List<String> findValue = fineValue(jsonStr, startIndexVal);
-        List<String> findKey = findKey(jsonObj, startIndexKey);
-
-        findValue.stream().forEach(System.out::println);
-        findKey.stream().forEach(System.out::println);
-
-        objectInfo.add(0,argFileName);
-        objectInfo.add(1, fieldName);
-        return objectInfo;
+        List<Map> findValue = fineValue(jsonObj);
+        return findValue;
     }
 
-    private static List<String> findKey(String jsonObj, int where) {
-        List<String> keyList = new ArrayList<>();
+    private static List<Map> fineValue(String jsonObj) {
 
-        int startIndex = jsonObj.indexOf("\"", where);
-        int startComma = jsonObj.indexOf(",",where);
-        if (startIndex == -1){
-            return null;
-        }
-        while(true){
-            String currentValue = findKeyJson(jsonObj, startIndex);
-            if (currentValue.isEmpty()) {
-                break;
-            }
-            keyList.add(currentValue);
-            startIndex = startIndex + startComma ;
-
-        }
-        return keyList;
-    }
-
-    private static String findKeyJson(String jsonObj, int where) {
-        int startIndex = jsonObj.indexOf("\"" ,where);
-        if (startIndex == -1){
-            return "";
-        }
-
-        int endIndex = findCommaIndex(jsonObj, startIndex, "\":");
-        int accuIndex = findCommaIndex(jsonObj,startIndex,"}");
-        int commaValue = findCommaIndex(jsonObj,startIndex,",");
-
-        int minIndex = 0;
-        if (endIndex !=-1) {
-            minIndex = endIndex;
-        }  else if (endIndex == -1){
-            minIndex = accuIndex - endIndex;
-        }
-        if (minIndex == -1){
-            return "";
-        }
-        System.out.println(jsonObj.substring(startIndex + 1, minIndex));
-        return jsonObj.substring(startIndex + 1, minIndex);
-
-    }
-
-    private static List<String>  fineValue(String jsonObj, int where) {
-
-        List<String> valuesList = new ArrayList<>();
-        // split from ,
-        int virgula = jsonObj.indexOf("," , where);
-        if (virgula == -1){
-            return null;
-        }
-
-        jsonObj = jsonObj.substring(jsonObj.indexOf("{") +1, jsonObj.indexOf("}"));
+        jsonObj = jsonObj.substring(jsonObj.indexOf("{") +1, jsonObj.indexOf("}")).trim();
 
         String[] splitVir = jsonObj.split(",");
 
-
-        Object fieldNameRow = "";
+        String fieldNameRow = "";
         Object valueRow = new Object();
         List<String> fieldList = new ArrayList<>();
         List<Object> valueList = new ArrayList<>();
 
+        Map<String, Object> infoJson = new HashMap<>();
+        List<Map> listInfoJsonMap = new ArrayList<>();
+
         for (int i = 0; i < splitVir.length ; i++){
             System.out.println(splitVir[i]);
             Object[] splitSubVir = splitVir[i].split(":");
-            fieldNameRow = splitSubVir[0];
-            System.out.println("before: " + fieldNameRow);
-            String fieldName = splitSubVir[0].toString().replace("\"", "");
+            fieldNameRow = (String) splitSubVir[0];
+            //System.out.println("before: " + fieldNameRow);
+            String fieldName = fieldNameRow.replace("\"", "");
             fieldName.trim();
+            fieldName.replaceAll("\\s+","");
+
+            infoJson.put(fieldName,splitSubVir[1]);
 
             fieldList.add(fieldName);
             valueList.add(splitSubVir[1]);
         }
-
-
-        int startIndex = jsonObj.indexOf(":", where);
-        if (startIndex == -1){
-            return null;
-        }
-
-        while(true){
-            String currentValue = findValueJson(jsonObj, startIndex);
-            if (currentValue.isEmpty()) {
-                break;
-            }
-            valuesList.add(currentValue);
-            startIndex = jsonObj.indexOf(currentValue, startIndex) + currentValue.length();
-        }
-        return valuesList;
-    }
-
-    private static String findValueJson(String jsonObj, int where) {
-        int startIndex = jsonObj.indexOf(":" ,where);
-        if (startIndex == -1){
-            return "";
-        }
-
-        int commaIndex = findCommaIndex(jsonObj, startIndex, ",");
-        int accuIndex = findCommaIndex(jsonObj,startIndex,"}");
-
-        int minIndex = 0;
-        if (commaIndex !=-1) {
-            minIndex = commaIndex;
-        } else if (commaIndex == -1){
-            minIndex = accuIndex;
-        }
-        if (minIndex == -1){
-            return "";
-        }
-        System.out.println(jsonObj.substring(startIndex + 1, minIndex));
-        return jsonObj.substring(startIndex + 1, minIndex);
-
-
-    }
-
-    private static int findCommaIndex(String jsonObj, int startIndex, String stopOnComma) {
-        int currentIndex = jsonObj.indexOf(stopOnComma, startIndex+1);
-        while (currentIndex !=-1){
-            return currentIndex;
-        }
-        return -1;
+        listInfoJsonMap.add(infoJson);
+        return listInfoJsonMap;
     }
 
     /**
