@@ -1,6 +1,7 @@
 package com.java.reflection;
 
 import com.java.reflection.model.Users;
+import com.sun.xml.internal.ws.util.StringUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -61,6 +62,12 @@ public class MainReflection {
     }
 
     private static List<Object> parseJson(String jsonObj) {
+
+        // { "A" :a, "B" : "b"} start test
+        String jsonStr = "{ \"Aaad\" :a, \"B\" : \"b\" , \"C\" : \"c\"}";
+        // split ,
+
+
         List<Object> objectInfo = new ArrayList<>();
         Object argFileName = null;
         String fieldName = "here";
@@ -78,7 +85,7 @@ public class MainReflection {
         }
 
         //TODO find all values here from JSON
-        List<String> findValue = fineValue(jsonObj, startIndexVal);
+        List<String> findValue = fineValue(jsonStr, startIndexVal);
         List<String> findKey = findKey(jsonObj, startIndexKey);
 
         findValue.stream().forEach(System.out::println);
@@ -136,6 +143,34 @@ public class MainReflection {
     private static List<String>  fineValue(String jsonObj, int where) {
 
         List<String> valuesList = new ArrayList<>();
+        // split from ,
+        int virgula = jsonObj.indexOf("," , where);
+        if (virgula == -1){
+            return null;
+        }
+
+        jsonObj = jsonObj.substring(jsonObj.indexOf("{") +1, jsonObj.indexOf("}"));
+
+        String[] splitVir = jsonObj.split(",");
+
+
+        Object fieldNameRow = "";
+        Object valueRow = new Object();
+        List<String> fieldList = new ArrayList<>();
+        List<Object> valueList = new ArrayList<>();
+
+        for (int i = 0; i < splitVir.length ; i++){
+            System.out.println(splitVir[i]);
+            Object[] splitSubVir = splitVir[i].split(":");
+            fieldNameRow = splitSubVir[0];
+            System.out.println("before: " + fieldNameRow);
+            String fieldName = splitSubVir[0].toString().replace("\"", "");
+            fieldName.trim();
+
+            fieldList.add(fieldName);
+            valueList.add(splitSubVir[1]);
+        }
+
 
         int startIndex = jsonObj.indexOf(":", where);
         if (startIndex == -1){
