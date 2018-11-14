@@ -142,9 +142,9 @@ public class MainReflection {
         if(jsonObj.trim().startsWith("{")) {
             jsonObj = jsonObj.substring(jsonObj.indexOf("{") + 1, jsonObj.lastIndexOf("}")).trim();
         }
-
+        String[] splitVir = null;
         if (!(jsonObj.contains("{"))) {
-            String[] splitVir = jsonObj.split(",");
+            splitVir = jsonObj.split(",");
         }
         else
             System.out.println("ther is an object");
