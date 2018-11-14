@@ -1,9 +1,12 @@
 package com.java.reflection;
 
+import com.java.reflection.model.Company;
 import com.java.reflection.model.Users;
 
+import javax.lang.model.type.PrimitiveType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.Wrapper;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +18,10 @@ public class MainReflection {
         Users users = new Users();
         users.setUserId(1);
         users.setUserName("hamid");
+        Company company = new Company();
+        company.setId_company(1);
+        company.setName_company("be");
+        users.setCompany(company);
 
         //Question 1
         Object objNew = copy(users);
@@ -26,7 +33,7 @@ public class MainReflection {
         //Question 2 public <T> T toObj(String json,Class<T> cls){
         Users companyClass = new Users();
         Class clazzToObj = companyClass.getClass();
-        String jsonObj = "{ \"userId\": 4 , \"userName\": \"hamid\" }";
+        String jsonObj = "{ \"userId\": { \"name\":\"John\", \"age\":30} , \"userName\": \"hamid\" }";
 
         Object stringToObject = toObj(jsonObj, clazzToObj);
         System.out.println(stringToObject);
@@ -105,16 +112,22 @@ public class MainReflection {
 
     private static Map<String, Object> parseJson(String jsonObj) {
 
-        jsonObj = jsonObj.substring(jsonObj.indexOf("{") + 1, jsonObj.indexOf("}")).trim();
-
-
-        String[] splitVir = jsonObj.split(",");
+        //TODO you have to apply to other
+        String[] keyValueSplited = keyValueSpliter(jsonObj);
 
         String fieldNameRow = "";
         Map<String, Object> infoJson = new HashMap<>();
 
-        for (int i = 0; i < splitVir.length; i++) {
-            Object[] splitSubVir = splitVir[i].split(":");
+        for (int i = 0; i < keyValueSplited.length; i++) {
+            Object[] splitSubVir = null;
+            if (!keyValueSplited[i].contains("{") && !keyValueSplited[i].contains(",")){
+                splitSubVir = keyValueSplited[i].split(":");
+            } else {
+                String objJsonValue = keyValueSplited[i];
+                String[] keyValueOfObjJson = keyValueSpliter(objJsonValue);
+                System.out.println("The Object Json and should consider it");
+            }
+
             fieldNameRow = (String) splitSubVir[0];
             //System.out.println("before: " + fieldNameRow);
             String fieldName = fieldNameRow.replace("\"", "").trim().replaceAll("\\s+", "");
@@ -123,6 +136,14 @@ public class MainReflection {
             System.out.println(splitSubVir[1].toString().trim());
         }
         return infoJson;
+    }
+
+    private static String[] keyValueSpliter(String jsonObj) {
+        if(jsonObj.trim().startsWith("{")) {
+            jsonObj = jsonObj.substring(jsonObj.indexOf("{") + 1, jsonObj.lastIndexOf("}")).trim();
+        }
+        String[] splitVir = jsonObj.split(",");
+        return splitVir;
     }
 
     /**
@@ -180,15 +201,40 @@ public class MainReflection {
         for (Method method : clazz.getDeclaredMethods()) {
             int nOfArgs = method.getParameterCount();
             String mName = method.getName();
+            String fieldNameWithUpper = mName.substring(3);
+            String fieldName = fieldNameWithUpper.toLowerCase().charAt(0) + fieldNameWithUpper.substring(1);
+
 
             if (mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3))) {
-                value = method.invoke(obj);
 
-                String mSetter = "s" + mName.substring(1);
-                Method methodSetter = clazz.getDeclaredMethod(mSetter, method.getReturnType());
-                methodSetter.invoke(newObj, value);
+                if (checkIsPrimitive(method)) {
+                    value = method.invoke(obj).getClass();
+                    String mSetter = "s" + mName.substring(1);
+                    Method methodSetter = clazz.getDeclaredMethod(mSetter, method.getReturnType());
+                    methodSetter.invoke(newObj, value);
+                } else {
+                    
+                    System.out.println("is Not primitive getCompany will give other fields ");
+
+
+                    value = method.invoke(obj.getClass().);
+                    System.out.println(value);
+                }
             }
         }
         return newObj;
+    }
+
+    private static boolean checkIsPrimitive(Method method) {
+
+        Class<?> methodType = method.getReturnType();
+
+        if (!(methodType.isPrimitive() || methodType == Double.class || methodType == Float.class || methodType == Long.class ||
+                methodType == Integer.class || methodType == Short.class || methodType == Character.class ||
+                methodType == Byte.class || methodType == Boolean.class || methodType == String.class)){
+            System.out.println("is Object");
+            return false;
+        }
+        return true;
     }
 }
