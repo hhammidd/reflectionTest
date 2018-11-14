@@ -1,6 +1,7 @@
 package com.java.reflection.model;
 
 public class Company {
+
     private int id_company;
     private String name_company;
 

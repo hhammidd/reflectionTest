@@ -3,6 +3,7 @@ package com.java.reflection.model;
 public class Users {
     private int userId;
     private String userName;
+    private Company company;
 
     public Users() {
     }
@@ -21,5 +22,13 @@ public class Users {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public Company getCompany() {
+        return company;
+    }
+
+    public void setCompany(Company company) {
+        this.company = company;
     }
 }

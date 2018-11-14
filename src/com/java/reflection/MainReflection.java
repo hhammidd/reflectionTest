@@ -201,25 +201,26 @@ public class MainReflection {
         for (Method method : clazz.getDeclaredMethods()) {
             int nOfArgs = method.getParameterCount();
             String mName = method.getName();
-            String fieldNameWithUpper = mName.substring(3);
-            String fieldName = fieldNameWithUpper.toLowerCase().charAt(0) + fieldNameWithUpper.substring(1);
-
-
             if (mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3))) {
 
-                if (checkIsPrimitive(method)) {
-                    value = method.invoke(obj).getClass();
+                //if (checkIsPrimitive(method)) {
+                    value = method.invoke(obj);
                     String mSetter = "s" + mName.substring(1);
                     Method methodSetter = clazz.getDeclaredMethod(mSetter, method.getReturnType());
                     methodSetter.invoke(newObj, value);
-                } else {
-                    
-                    System.out.println("is Not primitive getCompany will give other fields ");
+                //}
+                //else {
+                    //System.out.println("is Not primitive getCompany will give other fields ");
+                /*
+                value = method.invoke(obj);
+                    //TODO it does not need copy again
+                    //Object objJson = copy(value);
 
-
-                    value = method.invoke(obj.getClass().);
-                    System.out.println(value);
-                }
+                    String mSetter = "s" + mName.substring(1);
+                    Method methodSetter = clazz.getDeclaredMethod(mSetter, method.getReturnType());
+                    methodSetter.invoke(newObj, value);
+                  */
+                //}
             }
         }
         return newObj;
