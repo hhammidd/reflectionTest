@@ -168,8 +168,13 @@ public class MainReflection {
                 String fieldName = fieldNameWithUpper.toLowerCase().charAt(0) + fieldNameWithUpper.substring(1);
 
                 Method methodCall = clazz.getMethod(mName);
-
                 Object argFieldNew = methodCall.invoke(obj);
+                if (!(checkIsPrimitive(method))){
+                    toJsonedFor = toJson(argFieldNew);
+                    System.out.println(toJsonedFor);
+                }
+
+
                 // make the Json
                 toJsonedFor += "\"" + fieldName + "\": " + argFieldNew + ",\n";
             }
