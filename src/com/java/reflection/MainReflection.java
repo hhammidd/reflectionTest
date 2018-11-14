@@ -170,7 +170,7 @@ public class MainReflection {
                 Method methodCall = clazz.getMethod(mName);
                 Object argFieldNew = methodCall.invoke(obj);
                 if (!(checkIsPrimitive(method))){
-                    toJsonedFor = toJson(argFieldNew);
+                    argFieldNew = toJson(argFieldNew);
                     System.out.println(toJsonedFor);
                 }
 
