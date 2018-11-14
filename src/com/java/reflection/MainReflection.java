@@ -26,7 +26,7 @@ public class MainReflection {
         //Question 2 public <T> T toObj(String json,Class<T> cls){
         Users companyClass = new Users();
         Class clazzToObj = companyClass.getClass();
-        String jsonObj = "{ \"userId\": 5, \"userName\": \"hamid\" }";
+        String jsonObj = "{ \"userId\": 4 , \"userName\": \"hamid\" }";
 
         Object stringToObject = toObj(jsonObj, clazzToObj);
         System.out.println(stringToObject);
@@ -58,15 +58,45 @@ public class MainReflection {
                 String fieldNameWithUpper = mName.substring(3);
                 String fieldName = fieldNameWithUpper.toLowerCase().charAt(0) + fieldNameWithUpper.substring(1);
                 System.out.println(fieldName);
+                Object setValue = new Object();
 
                 // take the arg TODO delete userId
-                Object argFieldNew = objectInfo.entrySet().stream().filter(eKey -> eKey.getKey().equals("userId")).findFirst()
+                Object argFieldNew = objectInfo.entrySet().stream().filter(eKey -> eKey.getKey().equals(fieldName)).findFirst()
                         .get().getValue();
+                //TODO Update the boolean, Array, Number
+                if (!argFieldNew.toString().contains("\"") ){
+                    if (argFieldNew.toString().equals("true") || argFieldNew.toString().equals("false")){
+                        System.out.println("it is boolean and and ERROR is in Type");
+                    } else if (argFieldNew.toString().equals("null")){
+                        System.out.println("It is null and ERROR is in Type");
+                    } else if (argFieldNew.toString().contains("[") && argFieldNew.toString().contains("]")){
+                        System.out.println("It is Array and ERROR is in Type");
+                    }
+                    else {
+                        //TODO 12,03 not working as float because of parser split the input JSON
+                        if (argFieldNew.toString().contains(".") || argFieldNew.toString().contains(",")){
+                            System.out.println("number is float");
+                            setValue = Float.parseFloat((String) argFieldNew);
+                        } else {
+                            System.out.println("It is Integer or number (int or float)");
+                            setValue = Integer.parseInt((String) argFieldNew);
+                        }
 
+
+                    }
+                } else if (argFieldNew.toString().contains("\"")){
+                    setValue = argFieldNew;
+                    System.out.println("String ");
+                } // if JSON is Object
+                else if (argFieldNew.toString().contains("{") && argFieldNew.toString().contains("}")){
+                    System.out.println("This is JSON OBJECT");
+                } else {
+                    System.out.println("Not defined Format");
+                }
                 // you have to cast Object to the value is comming
                 System.out.println(method.getName());
                 Method methodSetter = clazzToObj.getDeclaredMethod(method.getName(), method.getParameterTypes());
-                methodSetter.invoke(clazzObj, 5);
+                methodSetter.invoke(clazzObj, setValue);
             }
         }
         return clazzObj;
@@ -90,6 +120,7 @@ public class MainReflection {
             String fieldName = fieldNameRow.replace("\"", "").trim().replaceAll("\\s+", "");
 
             infoJson.put(fieldName, splitSubVir[1].toString().trim());
+            System.out.println(splitSubVir[1].toString().trim());
         }
         return infoJson;
     }
