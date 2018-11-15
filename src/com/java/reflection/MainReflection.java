@@ -3,15 +3,12 @@ package com.java.reflection;
 import com.java.reflection.model.Company;
 import com.java.reflection.model.Users;
 
-import javax.lang.model.type.PrimitiveType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.Wrapper;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MainReflection {
-
 
     public static void main(String[] args) throws NoSuchFieldException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException {
 
@@ -33,8 +30,7 @@ public class MainReflection {
         //Question 2 public <T> T toObj(String json,Class<T> cls){
         Users companyClass = new Users();
         Class clazzToObj = companyClass.getClass();
-        String jsonObj = "{ \"userId\": { \"name\":\"John\", \"age\":30} , \"userName\": \"hamid\" }";
-
+        String jsonObj = "{ \"userId\": { \"vv\":\" fivrfi\", \"budeebu\":330}  , \"userName\": \"hamid\", \"Nme\": \"be\" ,\"userId\": { \"ageNAme\":\" fifi\", \"bubu\":30} ,  \"bcbc\": \"hacsmid\" }";
         Object stringToObject = toObj(jsonObj, clazzToObj);
         System.out.println(stringToObject);
     }
@@ -113,7 +109,8 @@ public class MainReflection {
     private static Map<String, Object> parseJson(String jsonObj) {
 
         //TODO you have to apply to other
-        String[] keyValueSplited = keyValueSpliter(jsonObj);
+        String[] keyValueSplited = keyValueSpliter(jsonObj).toArray(new String[0]);
+        System.out.println(keyValueSplited);
 
         String fieldNameRow = "";
         Map<String, Object> infoJson = new HashMap<>();
@@ -124,7 +121,7 @@ public class MainReflection {
                 splitSubVir = keyValueSplited[i].split(":");
             } else {
                 String objJsonValue = keyValueSplited[i];
-                String[] keyValueOfObjJson = keyValueSpliter(objJsonValue);
+                String[] keyValueOfObjJson = keyValueSpliter(objJsonValue).toArray(new String[0]);
                 System.out.println("The Object Json and should consider it");
             }
 
@@ -138,17 +135,71 @@ public class MainReflection {
         return infoJson;
     }
 
-    private static String[] keyValueSpliter(String jsonObj) {
+    private static List<String> keyValueSpliter(String jsonObj) {
+
+        List<String> keyValues = new ArrayList<>();
+        String[] splitVir = null;
         if(jsonObj.trim().startsWith("{")) {
             jsonObj = jsonObj.substring(jsonObj.indexOf("{") + 1, jsonObj.lastIndexOf("}")).trim();
         }
-        String[] splitVir = null;
+
         if (!(jsonObj.contains("{"))) {
             splitVir = jsonObj.split(",");
+            keyValues.addAll(Arrays.asList(splitVir));
         }
-        else
-            System.out.println("ther is an object");
-        return splitVir;
+        else {
+            String[] jsonObjGetter = jsObjGetter(jsonObj);
+            keyValues.add(jsonObjGetter[0]);
+            if (jsonObjGetter[1].contains("{")) {
+                while (true) {
+                    jsonObjGetter = jsObjGetter(jsonObjGetter[1]);
+                    if (!(jsonObjGetter[1]).contains("{")) {
+                        jsonObj = jsonObjGetter[1];
+                        break;
+                    }
+                    keyValues.add(jsonObjGetter[0]);
+                }
+            }
+
+            if (!(jsonObj.contains("{"))) {
+                splitVir = jsonObj.split(",");
+                keyValues.addAll(Arrays.asList(splitVir));
+            }
+
+        }
+        return keyValues;
+
+    }
+
+    private static String[] jsObjGetter(String jsonObj) {
+        String jsonObjectGot = "";
+        int indexofParantezOpen = jsonObj.indexOf("{");
+        int indexOfPrantezClose = jsonObj.indexOf("}");
+
+        String ValueOfJson = jsonObj.substring(indexofParantezOpen+1,indexOfPrantezClose);
+
+        String fieldOfJsonTemp = jsonObj.substring(indexofParantezOpen, indexOfPrantezClose+1);
+        String restTesxt = jsonObj.substring(0,indexofParantezOpen);
+
+        int lastJsonVirgula = restTesxt.lastIndexOf(",");
+        String fieldNameWithJson = "";
+        String restString ="";
+        if (lastJsonVirgula != -1) {
+             fieldNameWithJson = restTesxt.substring(lastJsonVirgula + 1) + fieldOfJsonTemp;
+             restString = jsonObj.substring(0,lastJsonVirgula) + jsonObj.substring(indexOfPrantezClose+1);
+
+        } else {
+             fieldNameWithJson = jsonObj.substring(0,indexOfPrantezClose);
+             jsonObj = jsonObj.replaceAll("}\\s+\\,", "},");
+             restString =  jsonObj.trim().substring(jsonObj.indexOf("},")+2);
+        }
+        String[] restAndJson = new String[2];
+        if (fieldNameWithJson.contains("{") && !(fieldNameWithJson.contains("}"))){
+            fieldNameWithJson += "}";
+        }
+        restAndJson[0] = fieldNameWithJson;
+        restAndJson[1] = restString;
+        return restAndJson;
     }
 
     /**
@@ -178,8 +229,6 @@ public class MainReflection {
                     argFieldNew = toJson(argFieldNew);
                     System.out.println(toJsonedFor);
                 }
-
-
                 // make the Json
                 toJsonedFor += "\"" + fieldName + "\": " + argFieldNew + ",\n";
             }
