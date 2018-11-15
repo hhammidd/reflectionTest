@@ -6,7 +6,6 @@ import com.java.reflection.model.Users;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class MainReflection {
 
@@ -24,14 +23,14 @@ public class MainReflection {
         Object objNew = copy(users);
 
         //Question 3
-        String JsonStringForObje = toJson(users);
-        System.out.println(JsonStringForObje);
+        String jsonStringForObje = toJson(users);
+        System.out.println(jsonStringForObje);
 
         //Question 2 public <T> T toObj(String json,Class<T> cls){
         Users companyClass = new Users();
         Class clazzToObj = companyClass.getClass();
-        String jsonObj = "{ \"userId\": { \"vv\":\" fivrfi\", \"budeebu\":330}  , \"userName\": \"hamid\", \"Nme\": \"be\" ,\"SecondJsonObj\": { \"secondJson\":\" fifi\", \"bubu\":30} ,  \"bcbc\": \"hacsmid\" ,\"userId\": { \"vv\":\" fivrfi\", \"budeebu\":330} }";
-        Object stringToObject = toObj(jsonObj, clazzToObj);
+        //String jsonObj = {"userName": hamid,"userId": 1,"company": {"name_company": be,"id_company": }"";
+        Object stringToObject = toObj(jsonStringForObje, clazzToObj);
         System.out.println(stringToObject);
     }
 
@@ -177,11 +176,8 @@ public class MainReflection {
     }
 
     private static String[] jsObjGetter(String jsonObj) {
-        String jsonObjectGot = "";
         int indexofParantezOpen = jsonObj.indexOf("{");
         int indexOfPrantezClose = jsonObj.indexOf("}");
-
-        String ValueOfJson = jsonObj.substring(indexofParantezOpen + 1, indexOfPrantezClose);
 
         String fieldOfJsonTemp = jsonObj.substring(indexofParantezOpen, indexOfPrantezClose + 1);
         String restTesxt = jsonObj.substring(0, indexofParantezOpen);
@@ -218,7 +214,7 @@ public class MainReflection {
      */
     private static String toJson(Object obj) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         Class clazz = obj.getClass();
-        String toJsoned = "{\n";
+        String toJsoned = "{";
         String toJsonedFor = "";
 
         for (Method method : clazz.getDeclaredMethods()) {
@@ -235,11 +231,11 @@ public class MainReflection {
                     System.out.println(toJsonedFor);
                 }
                 // make the Json
-                toJsonedFor += "\"" + fieldName + "\": " + argFieldNew + ",\n";
+                toJsonedFor += "\"" + fieldName + "\": " + argFieldNew + ",";
             }
         }
         toJsoned += toJsonedFor.substring(0, toJsonedFor.length() - 2);
-        toJsoned = toJsoned + "\n}";
+        toJsoned = toJsoned + "}";
         return toJsoned;
     }
 
