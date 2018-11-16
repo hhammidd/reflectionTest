@@ -12,7 +12,7 @@ public class MainReflection {
     public static void main(String[] args) throws NoSuchFieldException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException {
 
         Users users = new Users();
-        users.setUserId(1);
+        users.setUserId(100);
         users.setUserName("hamid");
         Company company = new Company();
         company.setId_company(1);
@@ -49,8 +49,10 @@ public class MainReflection {
     private static Object toObj(String jsonObj, Class clazzToObj) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         Object clazzObj = clazzToObj.newInstance();
 
-        Map<String, Object> objectInfo = new HashMap<>();
-        objectInfo = parseJson(jsonObj);
+        Map<String, Object> modelProperty = new HashMap<>();
+        modelProperty = parseJson(jsonObj);
+
+        // TODO put condition for arrived Json Object
 
         for (Method method : clazzToObj.getDeclaredMethods()) {
             int nOfArgs = method.getParameterCount();
@@ -63,9 +65,10 @@ public class MainReflection {
                 Object setValue = new Object();
 
                 // take the arg TODO delete userId
-                Object argFieldNew = objectInfo.entrySet().stream().filter(eKey -> eKey.getKey().equals(fieldName)).findFirst()
+                Object argFieldNew = modelProperty.entrySet().stream().filter(eKey -> eKey.getKey().equals(fieldName)).findFirst()
                         .get().getValue();
-                //TODO Update the boolean, Array, Number
+                //TODO Update the boolean, Array, Number.... Define a Method for this
+
                 if (!argFieldNew.toString().contains("\"")) {
                     if (argFieldNew.toString().equals("true") || argFieldNew.toString().equals("false")) {
                         System.out.println("it is boolean and and ERROR is in Type");
@@ -107,36 +110,49 @@ public class MainReflection {
     private static Map<String, Object> parseJson(String jsonObj) {
 
         Map<String, Object> infoJson = new HashMap<>();
-        String[] keyValueSplited = keyValueSpliter(jsonObj).toArray(new String[0]);
+        Map<String,Object> keyValueSplited1 = new HashMap<>();
+        List<String> keyValueSplited = keyValueSpliter(jsonObj);
         System.out.println(keyValueSplited);
 
         String fieldNameRow = "";
 
-        for (int i = 0; i < keyValueSplited.length; i++) {
+        for (String keyValues : keyValueSplited) {
             Object[] splitSubVir = null;
-            if (!keyValueSplited[i].contains("{") && !keyValueSplited[i].contains(",")) {
-                splitSubVir = keyValueSplited[i].split(":");
+            if (!keyValues.contains("{") && !keyValues.contains(",")) {
+                splitSubVir = keyValues.split(":");
                 fieldNameRow = (String) splitSubVir[0];
                 String fieldName = fieldNameRow.replace("\"", "").trim().replaceAll("\\s+", "");
                 infoJson.put(fieldName, splitSubVir[1].toString().trim());
                 System.out.println(splitSubVir[1].toString().trim());
             } else {
-                String objJsonValue = keyValueSplited[i];
-                objJsonValue = objJsonValue.replaceAll(":\\s+\\{", ":{");
-                objJsonValue = objJsonValue.replaceAll("\"\\s+\\:", "\":");
 
+                keyValues = keyValues.replaceAll(":\\s+\\{", ":{");
+                keyValues = keyValues.replaceAll("\"\\s+\\:", "\":");
 
-                objJsonValue = objJsonValue.trim();
-                String value = objJsonValue.substring(objJsonValue.indexOf(":") + 1).trim();
+                String keyOfObjectProperty = keyValues.substring(0,keyValues.indexOf(":")).trim();
+                String valueObjectProperty = keyValues.substring(keyValues.indexOf(":")+1);
+
+                keyValueSplited1 = parseJson(valueObjectProperty);
+                System.out.println(keyValueSplited1);
+
+                //objJsonValue = objJsonValue.trim();
+                //String value = objJsonValue.substring(objJsonValue.indexOf(":") + 1).trim();
                 //splitSubVir = objJsonValue.split("[:{]");
-                String fieldSub = objJsonValue.substring(1, objJsonValue.indexOf(":") - 1);
-                Map<String, Object> infoJsonSub = parseJson(value);
+                //String fieldSub = objJsonValue.substring(1, objJsonValue.indexOf(":") - 1);
+                //Map<String, Object> infoJsonSub = parseJson(value);
 
-                infoJson.put(fieldSub, infoJsonSub);
-                System.out.println("The Object Json and should consider it");
+                //infoJson.put(fieldSub, infoJsonSub);
+                //System.out.println("The Object Json and should consider it");
             }
         }
+        infoJson.putAll(keyValueSplited1);
         return infoJson;
+    }
+
+    private static String getJsonObjValue(Object[] splitSubVir) {
+        String jsonValueObj = "";
+
+        return jsonValueObj;
     }
 
     private static List<String> keyValueSpliter(String jsonObj) {
@@ -151,11 +167,11 @@ public class MainReflection {
             splitVir = jsonObj.split(",");
             keyValues.addAll(Arrays.asList(splitVir));
         } else {
-            String[] jsonObjGetter = jsObjGetter(jsonObj);
+            String[] jsonObjGetter = jsonKeyValueSpliter(jsonObj);
             keyValues.add(jsonObjGetter[0]);
             if (jsonObjGetter[1].contains("{")) {
                 while (true) {
-                    jsonObjGetter = jsObjGetter(jsonObjGetter[1]);
+                    jsonObjGetter = jsonKeyValueSpliter(jsonObjGetter[1]);
                     keyValues.add(jsonObjGetter[0]);
                     if (!(jsonObjGetter[1]).contains("{")) {
                         jsonObj = jsonObjGetter[1];
@@ -165,8 +181,8 @@ public class MainReflection {
                 }
             }
 
-            if (!(jsonObj.contains("{"))) {
-                splitVir = jsonObj.split(",");
+            if (!(jsonObjGetter[1].contains("{"))) {
+                splitVir = jsonObjGetter[1].split(",");
                 keyValues.addAll(Arrays.asList(splitVir));
             }
 
@@ -175,30 +191,30 @@ public class MainReflection {
 
     }
 
-    private static String[] jsObjGetter(String jsonObj) {
+    private static String[] jsonKeyValueSpliter(String jsonObj) {
         int indexofParantezOpen = jsonObj.indexOf("{");
         int indexOfPrantezClose = jsonObj.indexOf("}");
 
-        String fieldOfJsonTemp = jsonObj.substring(indexofParantezOpen, indexOfPrantezClose + 1);
-        String restTesxt = jsonObj.substring(0, indexofParantezOpen);
+        String strObjectPropertyValue = jsonObj.substring(indexofParantezOpen, indexOfPrantezClose + 1);
+        String strAllJsonWithoutObjValue = jsonObj.substring(0, indexofParantezOpen);
 
-        int lastJsonVirgula = restTesxt.lastIndexOf(",");
-        String fieldNameWithJson = "";
+        int startIndexOfObjProp = strAllJsonWithoutObjValue.lastIndexOf(",");
+        String propertyObjeSplited = "";
         String restString = "";
-        if (lastJsonVirgula != -1) {
-            fieldNameWithJson = restTesxt.substring(lastJsonVirgula + 1) + fieldOfJsonTemp;
-            restString = jsonObj.substring(0, lastJsonVirgula) + jsonObj.substring(indexOfPrantezClose + 1);
+        if (startIndexOfObjProp != -1) {
+            propertyObjeSplited = strAllJsonWithoutObjValue.substring(startIndexOfObjProp + 1) + strObjectPropertyValue;
+            restString = jsonObj.substring(0, startIndexOfObjProp) + jsonObj.substring(indexOfPrantezClose + 1);
 
         } else {
-            fieldNameWithJson = jsonObj.substring(0, indexOfPrantezClose);
+            propertyObjeSplited = jsonObj.substring(0, indexOfPrantezClose);
             jsonObj = jsonObj.replaceAll("}\\s+\\,", "},");
             restString = jsonObj.trim().substring(jsonObj.indexOf("},") + 2);
         }
         String[] restAndJson = new String[2];
-        if (fieldNameWithJson.contains("{") && !(fieldNameWithJson.contains("}"))) {
-            fieldNameWithJson += "}";
+        if (propertyObjeSplited.contains("{") && !(propertyObjeSplited.contains("}"))) {
+            propertyObjeSplited += "}";
         }
-        restAndJson[0] = fieldNameWithJson;
+        restAndJson[0] = propertyObjeSplited;
         restAndJson[1] = restString;
         return restAndJson;
     }
@@ -226,15 +242,33 @@ public class MainReflection {
 
                 Method methodCall = clazz.getMethod(mName);
                 Object argFieldNew = methodCall.invoke(obj);
+
+                Object setValue = new Object();
+                //TODO get the class type and do json due to that
+                System.out.println(method.getReturnType());
                 if (!(checkIsPrimitive(method))) {
                     argFieldNew = toJson(argFieldNew);
                     System.out.println(toJsonedFor);
+                } else if ( method.getReturnType().equals(Integer.TYPE)){
+                    System.out.println("is integer type");
+                } else if (method.getReturnType().equals(Boolean.TYPE)){
+                    System.out.println("is Boolean Type");
+                } else if (method.getReturnType().equals(Double.TYPE)){
+                    System.out.println("is double type");
+                } else if (method.getReturnType().equals(Float.TYPE)){
+                    System.out.println("it is float");
+                } else {
+                    argFieldNew = "\"" + argFieldNew +"\"";
+                    System.out.println("it is string");
                 }
+
+
+
                 // make the Json
                 toJsonedFor += "\"" + fieldName + "\": " + argFieldNew + ",";
             }
         }
-        toJsoned += toJsonedFor.substring(0, toJsonedFor.length() - 2);
+        toJsoned += toJsonedFor.substring(0, toJsonedFor.length() - 1);
         toJsoned = toJsoned + "}";
         return toJsoned;
     }
