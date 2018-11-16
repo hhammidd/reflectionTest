@@ -69,48 +69,71 @@ public class MainReflection {
                         .get().getValue();
                 //TODO Update the boolean, Array, Number.... Define a Method for this
 
-                if (!argFieldNew.toString().contains("\"")) {
-                    if (argFieldNew.toString().equals("true") || argFieldNew.toString().equals("false")) {
-                        System.out.println("it is boolean and and ERROR is in Type");
-                    } else if (argFieldNew.toString().equals("null")) {
-                        System.out.println("It is null and ERROR is in Type");
-                    } else if (argFieldNew.toString().contains("[") && argFieldNew.toString().contains("]")) {
-                        System.out.println("It is Array and ERROR is in Type");
-                    } else {
-                        //TODO 12,03 not working as float because of parser split the input JSON
-                        if (argFieldNew.toString().contains(".") || argFieldNew.toString().contains(",")) {
-                            System.out.println("number is float");
-                            setValue = Float.parseFloat((String) argFieldNew);
-                        } else {
-                            System.out.println("It is Integer or number (int or float)");
-                            setValue = Integer.parseInt((String) argFieldNew);
-                        }
+                if (argFieldNew instanceof Map){
+                    // argfield is an map which should give us a copy
 
 
-                    }
-                } else if (argFieldNew.toString().contains("\"")) {
-                    setValue = argFieldNew;
-                    System.out.println("String ");
-                } // if JSON is Object
-                else if (argFieldNew.toString().contains("{") && argFieldNew.toString().contains("}")) {
-                    System.out.println("This is JSON OBJECT");
+
+                    String mGetter = "g" + mName.substring(1);
+
+                    Method methodCall = clazzToObj.getMethod(mGetter);
+                    Class clazz = methodCall.getReturnType();
+                    Object newObj = clazz.newInstance();
+
+
+                    Object newOne = method.invoke(newObj,1);
+
+                    //Object argFieldNew1 = methodCall.invoke(argFieldNew);
+
+                    System.out.println(argFieldNew.toString());
+                    System.out.println();
+
                 } else {
-                    System.out.println("Not defined Format");
+                    if (!argFieldNew.toString().contains("\"")) {
+                        if (argFieldNew.toString().equals("true") || argFieldNew.toString().equals("false")) {
+                            System.out.println("it is boolean and and ERROR is in Type");
+                        } else if (argFieldNew.toString().equals("null")) {
+                            System.out.println("It is null and ERROR is in Type");
+                        } else if (argFieldNew.toString().contains("[") && argFieldNew.toString().contains("]")) {
+                            System.out.println("It is Array and ERROR is in Type");
+                        } else if (argFieldNew.toString().contains("{")){
+                            System.out.println("Json Type ");
+                        }
+                        else {
+                            //TODO 12,03 not working as float because of parser split the input JSON
+                            if (argFieldNew.toString().contains(".") || argFieldNew.toString().contains(",")) {
+                                System.out.println("number is float");
+                                setValue = Float.parseFloat((String) argFieldNew);
+                            } else {
+                                System.out.println("It is Integer or number (int or float)");
+                                setValue = Integer.parseInt((String) argFieldNew);
+                            }
+                        }
+                    } else if (argFieldNew.toString().contains("\"")) {
+                        setValue = argFieldNew;
+                        System.out.println("String ");
+                    } // if JSON is Object
+                    else if (argFieldNew.toString().contains("{") && argFieldNew.toString().contains("}")) {
+                        System.out.println("This is JSON OBJECT");
+                    } else {
+                        System.out.println("Not defined Format");
+                    }
+
+                    // you have to cast Object to the value is comming
+                    System.out.println(method.getName());
+                    Method methodSetter = clazzToObj.getDeclaredMethod(method.getName(), method.getParameterTypes());
+                    methodSetter.invoke(clazzObj, setValue);
                 }
-                // you have to cast Object to the value is comming
-                System.out.println(method.getName());
-                Method methodSetter = clazzToObj.getDeclaredMethod(method.getName(), method.getParameterTypes());
-                methodSetter.invoke(clazzObj, setValue);
             }
         }
         return clazzObj;
     }
 
-
     private static Map<String, Object> parseJson(String jsonObj) {
 
         Map<String, Object> infoJson = new HashMap<>();
         Map<String,Object> keyValueSplited1 = new HashMap<>();
+        Map<String,Object> keyValueSplitedObj = new HashMap<>();
         List<String> keyValueSplited = keyValueSpliter(jsonObj);
         System.out.println(keyValueSplited);
 
@@ -129,23 +152,17 @@ public class MainReflection {
                 keyValues = keyValues.replaceAll(":\\s+\\{", ":{");
                 keyValues = keyValues.replaceAll("\"\\s+\\:", "\":");
 
-                String keyOfObjectProperty = keyValues.substring(0,keyValues.indexOf(":")).trim();
+                String keyOfObjectProperty = keyValues.substring(1,keyValues.indexOf(":")-1).trim();
                 String valueObjectProperty = keyValues.substring(keyValues.indexOf(":")+1);
 
                 keyValueSplited1 = parseJson(valueObjectProperty);
+
+                keyValueSplitedObj.put(keyOfObjectProperty, keyValueSplited1);
+
                 System.out.println(keyValueSplited1);
-
-                //objJsonValue = objJsonValue.trim();
-                //String value = objJsonValue.substring(objJsonValue.indexOf(":") + 1).trim();
-                //splitSubVir = objJsonValue.split("[:{]");
-                //String fieldSub = objJsonValue.substring(1, objJsonValue.indexOf(":") - 1);
-                //Map<String, Object> infoJsonSub = parseJson(value);
-
-                //infoJson.put(fieldSub, infoJsonSub);
-                //System.out.println("The Object Json and should consider it");
             }
         }
-        infoJson.putAll(keyValueSplited1);
+        infoJson.putAll(keyValueSplitedObj);
         return infoJson;
     }
 
@@ -177,7 +194,6 @@ public class MainReflection {
                         jsonObj = jsonObjGetter[1];
                         break;
                     }
-
                 }
             }
 
@@ -185,10 +201,8 @@ public class MainReflection {
                 splitVir = jsonObjGetter[1].split(",");
                 keyValues.addAll(Arrays.asList(splitVir));
             }
-
         }
         return keyValues;
-
     }
 
     private static String[] jsonKeyValueSpliter(String jsonObj) {
@@ -262,8 +276,6 @@ public class MainReflection {
                     System.out.println("it is string");
                 }
 
-
-
                 // make the Json
                 toJsonedFor += "\"" + fieldName + "\": " + argFieldNew + ",";
             }
@@ -297,24 +309,10 @@ public class MainReflection {
             String mName = method.getName();
             if (mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3))) {
 
-                //if (checkIsPrimitive(method)) {
                 value = method.invoke(obj);
                 String mSetter = "s" + mName.substring(1);
                 Method methodSetter = clazz.getDeclaredMethod(mSetter, method.getReturnType());
                 methodSetter.invoke(newObj, value);
-                //}
-                //else {
-                //System.out.println("is Not primitive getCompany will give other fields ");
-                /*
-                value = method.invoke(obj);
-                    //TODO it does not need copy again
-                    //Object objJson = copy(value);
-
-                    String mSetter = "s" + mName.substring(1);
-                    Method methodSetter = clazz.getDeclaredMethod(mSetter, method.getReturnType());
-                    methodSetter.invoke(newObj, value);
-                  */
-                //}
             }
         }
         return newObj;
