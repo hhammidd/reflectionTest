@@ -36,9 +36,7 @@ public class MainReflection {
         //Question 2 public <T> T toObj(String json,Class<T> cls){
         Users companyClass = new Users();
         Class clazzToObj = companyClass.getClass();
-        //String jsonObj = {"userName": hamid,"userId": 1,"company": {"name_company": be,"id_company": }"";
         Object strToObj2 = toObj2(jsonStringForObje, clazzToObj);
-        //Object stringToObject = toObj(jsonStringForObje, clazzToObj);
         System.out.println(strToObj2);
     }
 
@@ -65,7 +63,7 @@ public class MainReflection {
                     Method method1 = clazzToObj.getMethod(mGetter);
 
                     // argfield is an map which should give us a copy
-                    Object subClazzObj = toObj((String) argFieldNew, method1.getReturnType());
+                    Object subClazzObj = toObj2((String) argFieldNew, method1.getReturnType());
 
                     method.invoke(clazzObj, subClazzObj);
 
@@ -119,6 +117,7 @@ public class MainReflection {
         String keyOfJson = "";
 
         List<String> keyValueSplited = keyValueSpliterNew(jsonStringForObje);
+        // this split key and Value
         infoJson = doPutJsonKeyValue(keyValueSplited);
 
         System.out.println("DONE");
@@ -136,6 +135,7 @@ public class MainReflection {
         jsonStringForObje = jsonStringForObje.replaceAll("\"\\s+\\:", "\":");
 
         List<String> jsonList = new ArrayList<>();
+        // Here devided all the Keys (Values include Json Object)
         jsonList = doParsJson(jsonStringForObje);
         System.out.println("here");
 
@@ -164,6 +164,7 @@ public class MainReflection {
                             jsonList.add(finalJson);
                             //System.out.println("final result should be: ss:{dd,{c{c}b}b} result is --> " + finalJson);
                             // TODO sometimes go to the error
+                            // here should add json Object
                             jsObj = jsObj.substring(finalJson.length()+1);
                             System.out.println("rest of text should be : ss:{dd,{c{c}b}b},ss:dd and Result is  "+ jsObj);
                             if (jsObj.indexOf(",") == -1){
@@ -179,7 +180,7 @@ public class MainReflection {
 
                 if (!(jsObj.contains(","))){
                     System.out.println("it is the last one");
-                    jsonList.add(jsObj);
+                    jsonList.add(jsObj.substring(0,jsObj.length()-1));
                     return jsonList;
                 }
             }
