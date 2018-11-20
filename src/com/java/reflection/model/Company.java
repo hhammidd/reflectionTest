@@ -4,8 +4,18 @@ public class Company {
 
     private int id_company;
     private String name_company;
+    private String country;
+    private City city;
 
     public Company() {
+    }
+
+    public City getCity() {
+        return city;
+    }
+
+    public void setCity(City city) {
+        this.city = city;
     }
 
     public int getId_company() {
@@ -22,5 +32,13 @@ public class Company {
 
     public void setName_company(String name_company) {
         this.name_company = name_company;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
     }
 }

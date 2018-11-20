@@ -38,14 +38,75 @@ public class MainReflection {
         Class clazzToObj = companyClass.getClass();
         //String jsonObj = {"userName": hamid,"userId": 1,"company": {"name_company": be,"id_company": }"";
         Object strToObj2 = toObj2(jsonStringForObje, clazzToObj);
-        Object stringToObject = toObj(jsonStringForObje, clazzToObj);
-        System.out.println(stringToObject);
+        //Object stringToObject = toObj(jsonStringForObje, clazzToObj);
+        System.out.println(strToObj2);
     }
 
-    private static Object toObj2(String jsonStringForObje, Class clazzToObj) throws IllegalAccessException, InstantiationException {
+    private static Object toObj2(String jsonStringForObje, Class clazzToObj) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         Object clazzObj = clazzToObj.newInstance();
         Map<String, Object> modelPropertyWithout = new HashMap<>();
         modelPropertyWithout = parseJsonWithoutNew(jsonStringForObje);
+
+        for (Method method : clazzToObj.getDeclaredMethods()) {
+            String mName = method.getName();
+            if (mName.startsWith("set") && Character.isUpperCase(mName.charAt(3))) {
+
+                String fieldNameWithUpper = mName.substring(3);
+                String fieldName = fieldNameWithUpper.toLowerCase().charAt(0) + fieldNameWithUpper.substring(1);
+                System.out.println(fieldName);
+                Object setValue = new Object();
+
+                Object argFieldNew = modelPropertyWithout.entrySet().stream().filter(eKey -> eKey.getKey().equals(fieldName)).findFirst()
+                        .get().getValue();
+
+                if (argFieldNew.toString().contains("{") && argFieldNew.toString().contains(",")) {
+
+                    String mGetter = "g" + mName.substring(1);
+                    Method method1 = clazzToObj.getMethod(mGetter);
+
+                    // argfield is an map which should give us a copy
+                    Object subClazzObj = toObj((String) argFieldNew, method1.getReturnType());
+
+                    method.invoke(clazzObj, subClazzObj);
+
+                } else {
+                    if (!argFieldNew.toString().contains("\"")) {
+                        if (argFieldNew.toString().equals("true") || argFieldNew.toString().equals("false")) {
+                            System.out.println("it is boolean and and ERROR is in Type");
+                        } else if (argFieldNew.toString().equals("null")) {
+                            System.out.println("It is null and ERROR is in Type");
+                        } else if (argFieldNew.toString().contains("[") && argFieldNew.toString().contains("]")) {
+                            System.out.println("It is Array and ERROR is in Type");
+                        } else if (argFieldNew.toString().contains("{")) {
+                            System.out.println("Json Type ");
+                        } else {
+                            if (argFieldNew.toString().contains(".") || argFieldNew.toString().contains(",")) {
+                                System.out.println("number is float");
+                                setValue = Float.parseFloat((String) argFieldNew);
+                            } else {
+                                System.out.println("It is Integer or number (int or float)");
+                                setValue = Integer.parseInt((String) argFieldNew);
+                            }
+                        }
+                    } else if (argFieldNew.toString().contains("\"")) {
+                        setValue = argFieldNew;
+                        System.out.println("String ");
+                    } // if JSON is Object
+                    else if (argFieldNew.toString().contains("{") && argFieldNew.toString().contains("}")) {
+                        System.out.println("This is JSON OBJECT");
+                    } else {
+                        System.out.println("Not defined Format");
+                    }
+
+                    // you have to cast Object to the value is comming
+                    System.out.println(method.getName());
+                    Method methodSetter = clazzToObj.getDeclaredMethod(method.getName(), method.getParameterTypes());
+                    method.invoke(clazzObj, setValue);
+                }
+            }
+        }
+
+
 
 
         return clazzObj;
@@ -58,14 +119,14 @@ public class MainReflection {
         String keyOfJson = "";
 
         List<String> keyValueSplited = keyValueSpliterNew(jsonStringForObje);
+        infoJson = doPutJsonKeyValue(keyValueSplited);
 
-        System.out.println(keyValueSplited);
-        infoJson.put(keyOfJson, valueOfJson);
+        System.out.println("DONE");
+
         return infoJson;
     }
 
     private static List<String> keyValueSpliterNew(String jsonStringForObje) {
-        List<String> keyValues = new ArrayList<>();
 
         if (jsonStringForObje.trim().startsWith("{")) {
             jsonStringForObje = jsonStringForObje.substring(jsonStringForObje.indexOf("{") + 1, jsonStringForObje.lastIndexOf("}")).trim();
@@ -74,26 +135,56 @@ public class MainReflection {
         jsonStringForObje = jsonStringForObje.replaceAll(":\\s+\\{", ":{");
         jsonStringForObje = jsonStringForObje.replaceAll("\"\\s+\\:", "\":");
 
-        List<String> subStr = new ArrayList<>();
-        String maybeJson = jsonStringForObje.substring(jsonStringForObje.indexOf(",")+1);
-        String jsoni = jsonStringForObje.substring(0,jsonStringForObje.indexOf(","));
+        List<String> jsonList = new ArrayList<>();
+        jsonList = doParsJson(jsonStringForObje);
+        System.out.println("here");
 
-        while (true){
-            maybeJson = maybeJson.substring(maybeJson.indexOf(",")+1);
-            jsoni = maybeJson.substring(0,maybeJson.indexOf(","));
-            if (!(jsoni).contains("{")){
-                keyValues.add(jsoni);
-            } else {
-                subStr = keyValueSpliterNew(jsoni);
+        return jsonList;
+    }
+
+    private static List<String> doParsJson(String jsObj) {
+            List<String> jsonList = new ArrayList<>();
+            while (true){
+                String jsonStringForObjePro = jsObj.substring(0,jsObj.indexOf(","));
+                String beforePran = jsObj.substring(0,jsObj.indexOf("{")+1);
+                if (jsonStringForObjePro.contains("{")) {
+
+                    String jsonStringForObjeRest = jsObj.substring(jsObj.indexOf("{")+1);
+                    int equalPrantezi = 1;
+                    String finalJson ="";
+                    for (int k = 0; k < jsonStringForObjeRest.length(); k++) {
+                        char ch = jsonStringForObjeRest.charAt(k);
+                        if (ch == '{') {
+                            equalPrantezi += 1;
+                        } else if (ch == '}') {
+                            equalPrantezi -= 1;
+                        }
+                        if (equalPrantezi == 0) {
+                            finalJson = beforePran + jsonStringForObjeRest.substring(0, k+1);
+                            jsonList.add(finalJson);
+                            //System.out.println("final result should be: ss:{dd,{c{c}b}b} result is --> " + finalJson);
+                            // TODO sometimes go to the error
+                            jsObj = jsObj.substring(finalJson.length()+1);
+                            System.out.println("rest of text should be : ss:{dd,{c{c}b}b},ss:dd and Result is  "+ jsObj);
+                            if (jsObj.indexOf(",") == -1){
+                                break;
+                            }
+                            break;
+                        }
+                    }
+                } else if (!(jsonStringForObjePro).contains("{") && jsObj.contains(",")){
+                    jsonList.add(jsonStringForObjePro);
+                    jsObj = jsObj.substring(jsonStringForObjePro.length()+1);
+                }
+
+                if (!(jsObj.contains(","))){
+                    System.out.println("it is the last one");
+                    jsonList.add(jsObj);
+                    return jsonList;
+                }
             }
 
-            if(!(maybeJson.contains(","))){
-                break;
-            }
 
-        }
-        keyValues.addAll(subStr);
-        return keyValues;
     }
 
     /**
@@ -182,11 +273,17 @@ public class MainReflection {
     private static Map<String, Object> parseJsonWithout(String jsonObj) {
 
         Map<String, Object> infoJson = new HashMap<>();
-        Map<String, Object> keyValueSplited1 = new HashMap<>();
-        Map<String, Object> keyValueSplitedObj = new HashMap<>();
 
         // TODO here id_company should be inside company
         List<String> keyValueSplited = keyValueSpliter(jsonObj);
+
+        infoJson = doPutJsonKeyValue(keyValueSplited);
+        return infoJson;
+    }
+
+    private static Map<String, Object> doPutJsonKeyValue(List<String> keyValueSplited) {
+        Map<String, Object> infoJson = new HashMap<>();
+        Map<String, Object> keyValueSplitedObj = new HashMap<>();
 
         String fieldNameRow = "";
 
@@ -210,7 +307,6 @@ public class MainReflection {
 
                 keyValueSplitedObj.put(keyOfObjectProperty, valueObjectProperty);
 
-                System.out.println(keyValueSplited1);
             }
         }
         infoJson.putAll(keyValueSplitedObj);
@@ -305,7 +401,7 @@ public class MainReflection {
 
              if (strObjectPropertyValue.substring(1).contains("{")){
                  strObjectPropertyValue = strObjectPropertyValue + "}";
-                 List<String> jsKry = keyValueSpliter(strObjectPropertyValue);
+                 List<String> jsKry = keyValueSpliterNew(strObjectPropertyValue);
                  System.out.println(jsKry);
              }
 
