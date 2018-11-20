@@ -29,10 +29,10 @@ public class ToJsonService {
                 Object argFieldNew = methodCall.invoke(obj);
 
 
-                System.out.println(method.getReturnType());
+                //System.out.println(method.getReturnType());
                 if (!(checkIsPrimitive(method))) {
                     argFieldNew = toJson(argFieldNew);
-                    System.out.println(toJsonedFor);
+                    //System.out.println(toJsonedFor);
                 } else if (method.getReturnType().equals(Integer.TYPE)) {
 
                 } else if (method.getReturnType().equals(Boolean.TYPE)) {
@@ -60,7 +60,7 @@ public class ToJsonService {
         if (!(methodType.isPrimitive() || methodType == Double.class || methodType == Float.class || methodType == Long.class ||
                 methodType == Integer.class || methodType == Short.class || methodType == Character.class ||
                 methodType == Byte.class || methodType == Boolean.class || methodType == String.class)) {
-            System.out.println("is Object");
+            //System.out.println("is Object");
             return false;
         }
         return true;

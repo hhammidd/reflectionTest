@@ -36,7 +36,7 @@ public class MainReflection {
         //Question 3
         ToJsonService toJsonService = new ToJsonService();
         String jsonStringForObje = toJsonService.toJson(users);
-        System.out.println(jsonStringForObje);
+        //System.out.println(jsonStringForObje);
 
         //Question 2 public <T> T toObj(String json,Class<T> cls){
         Users companyClass = new Users();
@@ -45,5 +45,4 @@ public class MainReflection {
         Object strToObj2 = toObject.toObj(jsonStringForObje, clazzToObj);
         System.out.println(strToObj2);
     }
-
 }

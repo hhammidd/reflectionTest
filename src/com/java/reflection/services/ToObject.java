@@ -48,32 +48,32 @@ public class ToObject {
                 } else {
                     if (!jsonValueMatched.toString().contains("\"")) {
                         if (jsonValueMatched.toString().equals("true") || jsonValueMatched.toString().equals("false")) {
-                            System.out.println("it is boolean and and ERROR is in Type");
+                            //System.out.println("it is boolean and and ERROR is in Type");
                         } else if (jsonValueMatched.toString().equals("null")) {
-                            System.out.println("It is null and ERROR is in Type");
+                            //System.out.println("It is null and ERROR is in Type");
                         } else if (jsonValueMatched.toString().contains("[") && jsonValueMatched.toString().contains("]")) {
-                            System.out.println("It is Array and ERROR is in Type");
+                            //System.out.println("It is Array and ERROR is in Type");
                         } else if (jsonValueMatched.toString().contains("{")) {
-                            System.out.println("Json Type ");
+                            //System.out.println("Json Type ");
                         } else {
                             if (jsonValueMatched.toString().contains(".") || jsonValueMatched.toString().contains(",")) {
-                                System.out.println("number is float");
+                                //System.out.println("number is float");
                                 setValue = Float.parseFloat((String) jsonValueMatched);
                             } else {
-                                System.out.println("It is Integer or number (int or float)");
+                                //System.out.println("It is Integer or number (int or float)");
                                 setValue = Integer.parseInt((String) jsonValueMatched);
                             }
                         }
                     } else if (jsonValueMatched.toString().contains("\"")) {
                         setValue = jsonValueMatched;
-                        System.out.println("String ");
+                        //System.out.println("String ");
                     } // if JSON is Object
                     else if (jsonValueMatched.toString().contains("{") && jsonValueMatched.toString().contains("}")) {
-                        System.out.println("This is JSON OBJECT");
+                        //System.out.println("This is JSON OBJECT");
                     } else {
-                        System.out.println("Not defined Format");
+                        //System.out.println("Not defined Format");
                     }
-                    System.out.println(method.getName());
+                    //System.out.println(method.getName());
                     method.invoke(clazzObj, setValue);
                 }
             }
@@ -108,6 +108,7 @@ public class ToObject {
 
     private static List<String> doParsJson(String jsObj) {
         List<String> jsonList = new ArrayList<>();
+        //jsObj = "\"company\":{\"country\": \"IT\",\"id_company\": 1,\"name_company\": \"be\",\"city\":{\"city_id\": 1001,\"city_Name\": \"MILANO\"}}";
         while (true){
             String firstJsonStringAnalysis = jsObj.substring(0,jsObj.indexOf(","));
             String beforePrantesi = jsObj.substring(0,jsObj.indexOf("{")+1);
@@ -127,7 +128,13 @@ public class ToObject {
                         finalJson = beforePrantesi + jsonStringRest.substring(0, k+1);
                         jsonList.add(finalJson);
                         // TODO sometimes go to the error
-                        jsObj = jsObj.substring(finalJson.length()+1);
+                        System.out.println("The Error is parsing this tojson Is : " + jsObj);
+                        System.out.println("The finalJson is : " + finalJson);
+                        if (!(jsObj.contains("}}"))) {
+                            jsObj = jsObj.substring(finalJson.length() + 1);
+                        } else {
+                            break;
+                        }
                         if (jsObj.indexOf(",") == -1){
                             break;
                         }
@@ -162,7 +169,6 @@ public class ToObject {
                 fieldNameRow = (String) splitSubVir[0];
                 String fieldName = fieldNameRow.replace("\"", "").trim().replaceAll("\\s+", "");
                 infoJson.put(fieldName, splitSubVir[1].toString().trim());
-                System.out.println(splitSubVir[1].toString().trim());
             } else {
 
                 keyValues = keyValues.replaceAll(":\\s+\\{", ":{");
