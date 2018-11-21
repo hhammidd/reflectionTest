@@ -8,8 +8,6 @@ import com.java.reflection.services.ToJsonService;
 import com.java.reflection.services.ToObject;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
 
 public class MainReflection {
 
@@ -32,6 +30,7 @@ public class MainReflection {
         //Question 1
         CopyObjectService copyObjectService = new CopyObjectService();
         Object objNew = copyObjectService.copy(users);
+        System.out.println(objNew);
 
         //Question 3
         ToJsonService toJsonService = new ToJsonService();

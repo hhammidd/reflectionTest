@@ -17,9 +17,8 @@ public class ToObject {
     }
 
     /**
-     *
      * @param jsonKeyValueSplitted : take the property or jsons (sperated by ,)
-     * @param clazzToObj : class of object
+     * @param clazzToObj           : class of object
      * @return
      * @throws IllegalAccessException
      * @throws InstantiationException
@@ -109,46 +108,52 @@ public class ToObject {
     private static List<String> doParsJson(String jsObj) {
         List<String> jsonList = new ArrayList<>();
         //jsObj = "\"company\":{\"country\": \"IT\",\"id_company\": 1,\"name_company\": \"be\",\"city\":{\"city_id\": 1001,\"city_Name\": \"MILANO\"}}";
-        while (true){
-            String firstJsonStringAnalysis = jsObj.substring(0,jsObj.indexOf(","));
-            String beforePrantesi = jsObj.substring(0,jsObj.indexOf("{")+1);
-            if (firstJsonStringAnalysis.contains("{")) {
-
-                String jsonStringRest = jsObj.substring(jsObj.indexOf("{")+1);
-                int equalPrantezi = 1;
-                String finalJson ="";
-                for (int k = 0; k < jsonStringRest.length(); k++) {
-                    char ch = jsonStringRest.charAt(k);
-                    if (ch == '{') {
-                        equalPrantezi += 1;
-                    } else if (ch == '}') {
-                        equalPrantezi -= 1;
-                    }
-                    if (equalPrantezi == 0) {
-                        finalJson = beforePrantesi + jsonStringRest.substring(0, k+1);
-                        jsonList.add(finalJson);
-                        // TODO sometimes go to the error
-                        System.out.println("The Error is parsing this tojson Is : " + jsObj);
-                        System.out.println("The finalJson is : " + finalJson);
-                        if (!(jsObj.contains("}}"))) {
-                            jsObj = jsObj.substring(finalJson.length() + 1);
-                        } else {
-                            break;
-                        }
-                        if (jsObj.indexOf(",") == -1){
-                            break;
-                        }
-                        break;
-                    }
-                }
-            } else if (!(firstJsonStringAnalysis).contains("{") && jsObj.contains(",")){
-                jsonList.add(firstJsonStringAnalysis);
-                jsObj = jsObj.substring(firstJsonStringAnalysis.length()+1);
-            }
-
-            if (!(jsObj.contains(","))){
-                jsonList.add(jsObj.substring(0,jsObj.length()-1));
+        while (true) {
+            if (!(jsObj.contains(","))) {
+                jsonList.add(jsObj);
                 return jsonList;
+            } else {
+                String firstJsonStringAnalysis = jsObj.substring(0, jsObj.indexOf(","));
+                String beforePrantesi = jsObj.substring(0, jsObj.indexOf("{") + 1);
+                if (firstJsonStringAnalysis.contains("{")) {
+
+                    String jsonStringRest = jsObj.substring(jsObj.indexOf("{") + 1);
+                    int equalPrantezi = 1;
+                    String finalJson = "";
+                    for (int k = 0; k < jsonStringRest.length(); k++) {
+                        char ch = jsonStringRest.charAt(k);
+                        if (ch == '{') {
+                            equalPrantezi += 1;
+                        } else if (ch == '}') {
+                            equalPrantezi -= 1;
+                        }
+                        if (equalPrantezi == 0) {
+                            //jsObj = "\"company\":{\"country\": \"IT\",\"city\":{\"city_Name\": \"MILANO\",\"city_id\": 1001},\"id_company\": 1,\"name_company\": \"be\"}";
+                            finalJson = beforePrantesi + jsonStringRest.substring(0, k+1);
+                            jsonList.add(finalJson);
+                            // TODO sometimes go to the error
+                            System.out.println("The Error is parsing this tojson Is : " + jsObj);
+                            System.out.println("The finalJson is : " + finalJson);
+                            if ((jsObj.indexOf(finalJson.length()+1)) != -1){
+                                jsObj = jsObj.substring(finalJson.length() + 1);
+                            } else {
+                                break;
+                            }
+                            if (jsObj.indexOf(",") == -1) {
+                                break;
+                            }
+                            break;
+                        }
+                    }
+                } else if (!(firstJsonStringAnalysis).contains("{") && jsObj.contains(",")) {
+                    jsonList.add(firstJsonStringAnalysis);
+                    jsObj = jsObj.substring(firstJsonStringAnalysis.length() + 1);
+                }
+
+                if (!(jsObj.contains(","))) {
+                    jsonList.add(jsObj.substring(0, jsObj.length() - 1));
+                    return jsonList;
+                }
             }
         }
 

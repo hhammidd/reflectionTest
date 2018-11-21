@@ -1,7 +1,11 @@
 package com.java.reflection.services;
 
+import com.java.reflection.model.Company;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import static com.java.reflection.services.ToJsonService.checkIsPrimitive;
 
 public class CopyObjectService {
     /**
@@ -31,7 +35,12 @@ public class CopyObjectService {
                 value = method.invoke(obj);
                 String mSetter = "s" + mName.substring(1);
                 Method methodSetter = clazz.getDeclaredMethod(mSetter, method.getReturnType());
-                methodSetter.invoke(newObj, value);
+                if (!(checkIsPrimitive(method))) {
+                    Object newSubObj = copy(value);
+                    methodSetter.invoke(newObj,newSubObj);
+                } else {
+                    methodSetter.invoke(newObj, value);
+                }
             }
         }
         return newObj;

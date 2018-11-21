@@ -53,7 +53,7 @@ public class ToJsonService {
         toJsoned = toJsoned + "}";
         return toJsoned;
     }
-    private static boolean checkIsPrimitive(Method method) {
+    public static boolean checkIsPrimitive(Method method) {
 
         Class<?> methodType = method.getReturnType();
 
