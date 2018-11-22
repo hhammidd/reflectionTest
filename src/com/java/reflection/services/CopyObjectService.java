@@ -5,7 +5,8 @@ import com.java.reflection.model.Company;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static com.java.reflection.services.ToJsonService.checkIsPrimitive;
+import static com.java.reflection.services.Utils.checkIsPrimitive;
+
 
 public class CopyObjectService {
     /**

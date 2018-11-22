@@ -3,6 +3,8 @@ package com.java.reflection.services;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import static com.java.reflection.services.Utils.checkIsPrimitive;
+
 public class ToJsonService {
     /**
      * Q3
@@ -53,16 +55,5 @@ public class ToJsonService {
         toJsoned = toJsoned + "}";
         return toJsoned;
     }
-    public static boolean checkIsPrimitive(Method method) {
 
-        Class<?> methodType = method.getReturnType();
-
-        if (!(methodType.isPrimitive() || methodType == Double.class || methodType == Float.class || methodType == Long.class ||
-                methodType == Integer.class || methodType == Short.class || methodType == Character.class ||
-                methodType == Byte.class || methodType == Boolean.class || methodType == String.class)) {
-            //System.out.println("is Object");
-            return false;
-        }
-        return true;
-    }
 }

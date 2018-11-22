@@ -113,10 +113,15 @@ public class ToObject {
                 jsonList.add(jsObj);
                 return jsonList;
             } else {
+                // Cut from first index to , ss:ee,dd --> ss:ee
                 String firstJsonStringAnalysis = jsObj.substring(0, jsObj.indexOf(","));
+                // cut from index 0 to prantezi { --> TODO it should have prantezi
                 String beforePrantesi = jsObj.substring(0, jsObj.indexOf("{") + 1);
+
                 if (firstJsonStringAnalysis.contains("{")) {
 
+                    // if first include { --> ss:{c:d},hh:ff --> cut the before prantezi
+                    // result --> c:d},hh:ff
                     String jsonStringRest = jsObj.substring(jsObj.indexOf("{") + 1);
                     int equalPrantezi = 1;
                     String finalJson = "";
@@ -129,25 +134,38 @@ public class ToObject {
                         }
                         if (equalPrantezi == 0) {
                             //jsObj = "\"company\":{\"country\": \"IT\",\"city\":{\"city_Name\": \"MILANO\",\"city_id\": 1001},\"id_company\": 1,\"name_company\": \"be\"}";
+                            // k is position of closed prantezi --> jsonRest: -->c:d},hh:ff --> for cutting it from rest
+                            // finalJson is total json include value
                             finalJson = beforePrantesi + jsonStringRest.substring(0, k+1);
                             jsonList.add(finalJson);
                             // TODO sometimes go to the error
-                            System.out.println("The Error is parsing this tojson Is : " + jsObj);
+                            // TODO you add { } object json , You will have after that 1. Nothing or ,
+                            // if it is not send back -1
+                            //
+
+                            System.out.println("The Error is parsing this jsObj Is : " + jsObj);
                             System.out.println("The finalJson is : " + finalJson);
-                            if ((jsObj.indexOf(finalJson.length()+1)) != -1){
+                            System.out.println("===Compare length ====jsonObj> "+jsObj.length() + " ====final length: "+ finalJson.length());
+                            //jsObj = "\"city\":{\"city_id\": 1001,\"city_Name\": \"MILANO\"}}";
+                            //finalJson = "\"city\":{\"city_id\": 1001,\"city_Name\": \"MILANO\"}";
+                            if (jsObj.length()-1 > finalJson.length()){
+                                System.out.println("finalJson is Cutted Here: --> should not");
                                 jsObj = jsObj.substring(finalJson.length() + 1);
                             } else {
-                                break;
-                            }
-                            if (jsObj.indexOf(",") == -1) {
-                                break;
+                                return jsonList;
                             }
                             break;
                         }
                     }
                 } else if (!(firstJsonStringAnalysis).contains("{") && jsObj.contains(",")) {
+                    // jsObj--> ss:dd
                     jsonList.add(firstJsonStringAnalysis);
-                    jsObj = jsObj.substring(firstJsonStringAnalysis.length() + 1);
+                    // this is put rest of json here
+                    // TODO you have to consider if there will be or not
+                    if (jsObj.length() > firstJsonStringAnalysis.length() ) {
+                        jsObj = jsObj.substring(firstJsonStringAnalysis.length() + 1);
+                    } else
+                        return jsonList;
                 }
 
                 if (!(jsObj.contains(","))) {
