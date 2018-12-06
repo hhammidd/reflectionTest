@@ -35,7 +35,7 @@ public class CopyObjectService {
 
                 value = method.invoke(obj);
                 String mSetter = "s" + mName.substring(1);
-                Method methodSetter = clazz.getDeclaredMethod(mSetter, method.getReturnType());
+                Method methodSetter = clazz.getMethod(mSetter, method.getReturnType());
                 if (!(checkIsPrimitive(method))) {
                     Object newSubObj = copy(value);
                     methodSetter.invoke(newObj,newSubObj);
