@@ -33,6 +33,7 @@ public class CopyObjectService {
             String mName = method.getName();
             if (mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3))) {
 
+
                 value = method.invoke(obj);
                 String mSetter = "s" + mName.substring(1);
                 Method methodSetter = clazz.getMethod(mSetter, method.getReturnType());

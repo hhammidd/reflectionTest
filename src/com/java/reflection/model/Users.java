@@ -1,6 +1,10 @@
 package com.java.reflection.model;
 
+import com.java.reflection.MyTransition;
+
 public class Users {
+
+
     private int userId;
     private String userName;
     private Company company;
@@ -8,6 +12,7 @@ public class Users {
     public Users() {
     }
 
+    @MyTransition()
     public int getUserId() {
         return userId;
     }
