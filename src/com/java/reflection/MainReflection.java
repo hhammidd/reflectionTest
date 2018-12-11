@@ -22,11 +22,10 @@ public class MainReflection {
         company.setId_company(1);
         company.setName_company("be");
         company.setCountry("IT");
-        company.setCity(null);
         City city = new City();
         city.setCity_id(1001);
         city.setCity_Name("MILANO");
-        //company.setCity(city);
+        company.setCity(city);
 
         users.setCompany(company);
 

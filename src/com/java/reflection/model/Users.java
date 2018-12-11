@@ -8,11 +8,19 @@ public class Users {
     private int userId;
     private String userName;
     private Company company;
+    private boolean register;
 
     public Users() {
     }
 
-    @MyTransition()
+    public boolean isRegister() {
+        return register;
+    }
+
+    public void setRegister(boolean register) {
+        this.register = register;
+    }
+
     public int getUserId() {
         return userId;
     }

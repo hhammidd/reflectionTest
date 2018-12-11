@@ -23,10 +23,16 @@ public class ToJsonService {
         for (Method method : clazz.getDeclaredMethods()) {
             int nOfArgs = method.getParameterCount();
             String mName = method.getName();
-            if (mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3))) {
-                String fieldNameWithUpper = mName.substring(3);
-                String fieldName = fieldNameWithUpper.toLowerCase().charAt(0) + fieldNameWithUpper.substring(1);
+            if ((mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3)) ||
+                    mName.startsWith("is") && Character.isUpperCase(mName.charAt(2)))) {
+                String fieldNameWithUpper = "";
+                if (mName.startsWith("get")) {
+                    fieldNameWithUpper = mName.substring(3);
+                } else if (mName.startsWith("is")){
+                    fieldNameWithUpper = mName.substring(2);
+                }
 
+                String fieldName = fieldNameWithUpper.toLowerCase().charAt(0) + fieldNameWithUpper.substring(1);
                 Method methodCall = clazz.getMethod(mName);
                 Object argFieldNew = methodCall.invoke(obj);
 

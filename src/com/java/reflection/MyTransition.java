@@ -12,6 +12,4 @@ import java.lang.annotation.Target;
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MyTransition {
-    int studentAge() default 18;
-    String stuStream() default "CSE";
 }

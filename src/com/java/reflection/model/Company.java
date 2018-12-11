@@ -1,5 +1,7 @@
 package com.java.reflection.model;
 
+import com.java.reflection.MyTransition;
+
 public class Company {
 
     private int id_company;

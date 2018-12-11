@@ -10,8 +10,10 @@ import java.util.Map;
 public class ToObject {
     public static Object toObj(String jsonStringForObje, Class clazzToObj) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         Object clazzObj = clazzToObj.newInstance();
+        //jsonKeyValueSplitted --> is a map of keys and values of json... value can be a json also.
         Map<String, Object> jsonKeyValueSplitted = new HashMap<>();
         jsonKeyValueSplitted = parseJsonWithoutNew(jsonStringForObje);
+        //TODO here there is error
         clazzObj = objectValueInvoker(jsonKeyValueSplitted, clazzToObj);
         return clazzObj;
     }
@@ -29,6 +31,7 @@ public class ToObject {
             String mName = method.getName();
             if (mName.startsWith("set") && Character.isUpperCase(mName.charAt(3))) {
 
+
                 String fieldNameWithUpper = mName.substring(3);
                 String fieldName = fieldNameWithUpper.toLowerCase().charAt(0) + fieldNameWithUpper.substring(1);
                 Object setValue = new Object();
@@ -37,8 +40,12 @@ public class ToObject {
                         .get().getValue();
 
                 if (jsonValueMatched.toString().contains("{") && jsonValueMatched.toString().contains(",")) {
+                    String mGetter = "";
+                    //TODO if the method is the boolean put is
 
-                    String mGetter = "g" + mName.substring(1);
+                    // else put g and then invoke
+                    mGetter = "g" + mName.substring(1);
+                    // e
                     Method method1 = clazzToObj.getMethod(mGetter);
 
                     Object subClazzObj = toObj((String) jsonValueMatched, method1.getReturnType());
@@ -47,6 +54,7 @@ public class ToObject {
                 } else {
                     if (!jsonValueMatched.toString().contains("\"")) {
                         if (jsonValueMatched.toString().equals("true") || jsonValueMatched.toString().equals("false")) {
+                            setValue = Boolean.valueOf((String) jsonValueMatched);
                             //System.out.println("it is boolean and and ERROR is in Type");
                         } else if (jsonValueMatched.toString().equals("null")) {
                             //System.out.println("It is null and ERROR is in Type");
@@ -84,12 +92,19 @@ public class ToObject {
     private static Map<String, Object> parseJsonWithoutNew(String jsonStringForObje) {
         Map<String, Object> jsonKeyValueSplitedMap = new HashMap<>();
 
+        //will give list of key and value of json ()
         List<String> keyValueSplited = keyValueSpliter(jsonStringForObje);
+
         jsonKeyValueSplitedMap = doPutJsonKeyValue(keyValueSplited);
 
         return jsonKeyValueSplitedMap;
     }
 
+    /**
+     * will give list of key and value of json ()
+     * @param jsonInformation
+     * @return
+     */
     private static List<String> keyValueSpliter(String jsonInformation) {
 
         if (jsonInformation.trim().startsWith("{")) {
@@ -169,7 +184,12 @@ public class ToObject {
                 }
 
                 if (!(jsObj.contains(","))) {
-                    jsonList.add(jsObj.substring(0, jsObj.length() - 1));
+                    // TODO check here
+                    if (jsObj.charAt(jsObj.length() -1) == '}' ){
+                        jsObj = jsObj.substring(0, jsObj.length() -1);
+                    } else {
+                        jsonList.add(jsObj);
+                    }
                     return jsonList;
                 }
             }
@@ -179,6 +199,11 @@ public class ToObject {
     }
 
 
+    /**
+     * put key of Json in key Map and value in value of Hash map
+     * @param keyValueSplited
+     * @return
+     */
     private static Map<String, Object> doPutJsonKeyValue(List<String> keyValueSplited) {
         Map<String, Object> infoJson = new HashMap<>();
         Map<String, Object> keyValueSplitedObj = new HashMap<>();
@@ -193,13 +218,13 @@ public class ToObject {
                 String fieldName = fieldNameRow.replace("\"", "").trim().replaceAll("\\s+", "");
                 infoJson.put(fieldName, splitSubVir[1].toString().trim());
             } else {
-
+                // Not Obj Json
                 keyValues = keyValues.replaceAll(":\\s+\\{", ":{");
                 keyValues = keyValues.replaceAll("\"\\s+\\:", "\":");
 
                 String keyOfObjectProperty = keyValues.substring(1, keyValues.indexOf(":") - 1).trim();
                 String valueObjectProperty = keyValues.substring(keyValues.indexOf(":") + 1);
-                valueObjectProperty = valueObjectProperty + "}";
+                //valueObjectProperty = valueObjectProperty + "}";
 
 
                 keyValueSplitedObj.put(keyOfObjectProperty, valueObjectProperty);
