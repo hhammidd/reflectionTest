@@ -1,5 +1,7 @@
 package com.java.reflection.services;
 
+import com.java.reflection.MyTransition;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -26,13 +28,21 @@ public class ToObject {
      * @throws InstantiationException
      */
     private static Object objectValueInvoker(Map<String, Object> jsonKeyValueSplitted, Class clazzToObj) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+
         Object clazzObj = clazzToObj.newInstance();
         for (Method method : clazzToObj.getDeclaredMethods()) {
+            int nOfArgs = method.getParameterCount();
             String mName = method.getName();
-            if (mName.startsWith("set") && Character.isUpperCase(mName.charAt(3))) {
+            //TODO do with get
+            if (((mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3)) && !method.isAnnotationPresent(MyTransition.class))||
+                    mName.startsWith("is") && Character.isUpperCase(mName.charAt(2))) && !method.isAnnotationPresent(MyTransition.class)) {
+                String fieldNameWithUpper = "";
+                if (mName.startsWith("get")) {
+                    fieldNameWithUpper = mName.substring(3);
+                } else if (mName.startsWith("is")){
+                    fieldNameWithUpper = mName.substring(2);
+                }
 
-
-                String fieldNameWithUpper = mName.substring(3);
                 String fieldName = fieldNameWithUpper.toLowerCase().charAt(0) + fieldNameWithUpper.substring(1);
                 Object setValue = new Object();
 
@@ -40,17 +50,18 @@ public class ToObject {
                         .get().getValue();
 
                 if (jsonValueMatched.toString().contains("{") && jsonValueMatched.toString().contains(",")) {
-                    String mGetter = "";
+                    //String mGetter = "";
                     //TODO if the method is the boolean put is
 
                     // else put g and then invoke
-                    mGetter = "g" + mName.substring(1);
+                    //mGetter = "g" + mName.substring(1);
                     // e
-                    Method method1 = clazzToObj.getMethod(mGetter);
+                    Method method1 = clazzToObj.getMethod(mName);
 
                     Object subClazzObj = toObj((String) jsonValueMatched, method1.getReturnType());
-
-                    method.invoke(clazzObj, subClazzObj);
+                    String mSetterSub = "s" + mName.substring(1);
+                    Method methodSetterSub = clazzToObj.getMethod(mSetterSub, method.getReturnType());
+                    methodSetterSub.invoke(clazzObj, subClazzObj);
                 } else {
                     if (!jsonValueMatched.toString().contains("\"")) {
                         if (jsonValueMatched.toString().equals("true") || jsonValueMatched.toString().equals("false")) {
@@ -72,6 +83,7 @@ public class ToObject {
                             }
                         }
                     } else if (jsonValueMatched.toString().contains("\"")) {
+                        jsonValueMatched = jsonValueMatched.toString().replaceAll("\"","");
                         setValue = jsonValueMatched;
                         //System.out.println("String ");
                     } // if JSON is Object
@@ -80,8 +92,11 @@ public class ToObject {
                     } else {
                         //System.out.println("Not defined Format");
                     }
-                    //System.out.println(method.getName());
-                    method.invoke(clazzObj, setValue);
+                    String mSetter = "set" + fieldNameWithUpper;
+                    System.out.println("the last method name: " +method.getName());
+
+                    Method methodSetter = clazzToObj.getMethod(mSetter, method.getReturnType());
+                    methodSetter.invoke(clazzObj, setValue);
                 }
             }
         }

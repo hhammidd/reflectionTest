@@ -1,5 +1,7 @@
 package com.java.reflection.services;
 
+import com.java.reflection.MyTransition;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -15,7 +17,7 @@ public class ToJsonService {
      * @throws IllegalAccessException
      * @throws NoSuchMethodException
      */
-    public String toJson(Object obj) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+    public String  toJson(Object obj) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         Class clazz = obj.getClass();
         String toJsoned = "{";
         String toJsonedFor = "";
@@ -23,8 +25,8 @@ public class ToJsonService {
         for (Method method : clazz.getDeclaredMethods()) {
             int nOfArgs = method.getParameterCount();
             String mName = method.getName();
-            if ((mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3)) ||
-                    mName.startsWith("is") && Character.isUpperCase(mName.charAt(2)))) {
+            if (((mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3)) && !method.isAnnotationPresent(MyTransition.class))||
+                    mName.startsWith("is") && Character.isUpperCase(mName.charAt(2))) && !method.isAnnotationPresent(MyTransition.class)) {
                 String fieldNameWithUpper = "";
                 if (mName.startsWith("get")) {
                     fieldNameWithUpper = mName.substring(3);
@@ -32,10 +34,10 @@ public class ToJsonService {
                     fieldNameWithUpper = mName.substring(2);
                 }
 
+                //todo
                 String fieldName = fieldNameWithUpper.toLowerCase().charAt(0) + fieldNameWithUpper.substring(1);
                 Method methodCall = clazz.getMethod(mName);
                 Object argFieldNew = methodCall.invoke(obj);
-
 
                 //System.out.println(method.getReturnType());
                 if (!(checkIsPrimitive(method))) {
@@ -52,7 +54,6 @@ public class ToJsonService {
                 } else {
                     argFieldNew = "\"" + argFieldNew + "\"";
                 }
-
                 // make the Json
                 toJsonedFor += "\"" + fieldName + "\": " + argFieldNew + ",";
             }

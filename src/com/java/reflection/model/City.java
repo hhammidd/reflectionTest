@@ -5,9 +5,9 @@ public class City {
     private String city_Name;
 
 
-
     public City() {
     }
+
 
     public int getCity_id() {
         return city_id;

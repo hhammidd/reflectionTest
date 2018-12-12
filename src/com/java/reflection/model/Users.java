@@ -2,15 +2,28 @@ package com.java.reflection.model;
 
 import com.java.reflection.MyTransition;
 
+import java.util.Date;
+
 public class Users {
 
 
     private int userId;
+    private double userAmount;
     private String userName;
     private Company company;
     private boolean register;
+    //TODO date in toObj will not work
+    //private Date expirationDate;
 
     public Users() {
+    }
+
+    public double getUserAmount() {
+        return userAmount;
+    }
+
+    public void setUserAmount(double userAmount) {
+        this.userAmount = userAmount;
     }
 
     public boolean isRegister() {
@@ -29,6 +42,7 @@ public class Users {
         this.userId = userId;
     }
 
+    @MyTransition
     public String getUserName() {
         return userName;
     }

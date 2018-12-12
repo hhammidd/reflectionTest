@@ -17,7 +17,9 @@ public class MainReflection {
         Users users = new Users();
         users.setUserId(100);
         users.setUserName("hamid");
-        users.setRegister(false);
+        users.setRegister(true);
+        users.setUserAmount(1.02);
+        //users.setExpirationDate(java.sql.Date.valueOf(LocalDate.now()));
         Company company = new Company();
         company.setId_company(1);
         company.setName_company("be");
@@ -41,6 +43,7 @@ public class MainReflection {
 
         //Question 2 public <T> T toObj(String json,Class<T> cls){
         Users companyClass = new Users();
+        //jsonStringForObje = "{\"register\": false,\"userName\": \"hamid\",\"userId\": 100,\"userAmount\": 1.02,\"company\": {\"country\": \"IT\",\"id_company\": 1,\"name_company\": \"be\",\"city\": {\"city_Name\": \"MILANO\",\"city_id\": 1001}}}";
         Class clazzToObj = companyClass.getClass();
         ToObject toObject = new ToObject();
         Object strToObj2 = toObject.toObj(jsonStringForObje, clazzToObj);

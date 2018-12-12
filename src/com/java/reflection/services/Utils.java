@@ -1,6 +1,7 @@
 package com.java.reflection.services;
 
 import java.lang.reflect.Method;
+import java.util.Date;
 
 public class Utils {
     public static boolean checkIsPrimitive(Method method) {
@@ -9,7 +10,7 @@ public class Utils {
 
         if (!(methodType.isPrimitive() || methodType == Double.class || methodType == Float.class || methodType == Long.class ||
                 methodType == Integer.class || methodType == Short.class || methodType == Character.class ||
-                methodType == Byte.class || methodType == Boolean.class || methodType == String.class)) {
+                methodType == Byte.class || methodType == Boolean.class || methodType == String.class || methodType == Date.class)) {
             //System.out.println("is Object");
             return false;
         }
