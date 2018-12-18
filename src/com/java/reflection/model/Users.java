@@ -36,7 +36,7 @@ public class Users {
         this.register = register;
     }
 
-    @MyTransition
+
     public int getUserId() {
         return userId;
     }
@@ -45,6 +45,7 @@ public class Users {
         this.userId = userId;
     }
 
+    @MyTransition("noToObj")
     public String getUserName() {
         return userName;
     }

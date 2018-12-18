@@ -37,130 +37,81 @@ public class ToObject {
             if (!method.isAnnotationPresent(MyTransition.class)) {
                 if (((mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3))) ||
                         mName.startsWith("is") && Character.isUpperCase(mName.charAt(2)))) {
-                    String fieldNameWithUpper = "";
-                    if (mName.startsWith("get")) {
-                        fieldNameWithUpper = mName.substring(3);
-                    } else if (mName.startsWith("is")) {
-                        fieldNameWithUpper = mName.substring(2);
-                    }
-
-                    String fieldName = fieldNameWithUpper.toLowerCase().charAt(0) + fieldNameWithUpper.substring(1);
-                    Object setValue = new Object();
-
-                    Object jsonValueMatched = jsonKeyValueSplitted.entrySet().stream().filter(eKey -> eKey.getKey().equals(fieldName)).findFirst()
-                            .get().getValue();
-
-                    if (jsonValueMatched.toString().contains("{") && jsonValueMatched.toString().contains(",")) {
-
-                        Method method1 = clazzToObj.getMethod(mName);
-
-                        Object subClazzObj = toObj((String) jsonValueMatched, method1.getReturnType());
-                        String mSetterSub = "s" + mName.substring(1);
-                        Method methodSetterSub = clazzToObj.getMethod(mSetterSub, method.getReturnType());
-                        methodSetterSub.invoke(clazzObj, subClazzObj);
-                    } else {
-                        if (!jsonValueMatched.toString().contains("\"")) {
-                            if (jsonValueMatched.toString().equals("true") || jsonValueMatched.toString().equals("false")) {
-                                setValue = Boolean.valueOf((String) jsonValueMatched);
-                                //System.out.println("it is boolean and and ERROR is in Type");
-                            } else if (jsonValueMatched.toString().equals("null")) {
-                                setValue = null;
-                            } else if (jsonValueMatched.toString().contains("[") && jsonValueMatched.toString().contains("]")) {
-                                //System.out.println("It is Array and ERROR is in Type");
-                            } else if (jsonValueMatched.toString().contains("{")) {
-                                //System.out.println("Json Type ");
-                            } else {
-                                if (jsonValueMatched.toString().contains(".") || jsonValueMatched.toString().contains(",")) {
-                                    //System.out.println("number is float");
-                                    setValue = Float.parseFloat((String) jsonValueMatched);
-                                } else {
-                                    //System.out.println("It is Integer or number (int or float)");
-                                    setValue = Integer.parseInt((String) jsonValueMatched);
-                                }
-                            }
-                        } else if (jsonValueMatched.toString().contains("\"")) {
-                            jsonValueMatched = jsonValueMatched.toString().replaceAll("\"", "");
-                            setValue = jsonValueMatched;
-                            //System.out.println("String ");
-                        } // if JSON is Object
-                        else if (jsonValueMatched.toString().contains("{") && jsonValueMatched.toString().contains("}")) {
-                            //System.out.println("This is JSON OBJECT");
-                        } else {
-                            //System.out.println("Not defined Format");
-                        }
-                        String mSetter = "set" + fieldNameWithUpper;
-                        System.out.println("the last method name: " + method.getName());
-
-                        Method methodSetter = clazzToObj.getMethod(mSetter, method.getReturnType());
-                        methodSetter.invoke(clazzObj, setValue);
-                    }
+                    doObjInvok(mName,jsonKeyValueSplitted, method, clazzObj,clazzToObj);
                 }
+
             }  else if (!method.getAnnotation(MyTransition.class).value().equals("noAllJob") &&
                     !method.getAnnotation(MyTransition.class).value().equals("noToObj")){
                 if (((mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3))) ||
                         mName.startsWith("is") && Character.isUpperCase(mName.charAt(2)))) {
-                    String fieldNameWithUpper = "";
-                    if (mName.startsWith("get")) {
-                        fieldNameWithUpper = mName.substring(3);
-                    } else if (mName.startsWith("is")) {
-                        fieldNameWithUpper = mName.substring(2);
-                    }
+                    doObjInvok(mName,jsonKeyValueSplitted, method, clazzObj,clazzToObj);
 
-                    String fieldName = fieldNameWithUpper.toLowerCase().charAt(0) + fieldNameWithUpper.substring(1);
-                    Object setValue = new Object();
-
-                    Object jsonValueMatched = jsonKeyValueSplitted.entrySet().stream().filter(eKey -> eKey.getKey().equals(fieldName)).findFirst()
-                            .get().getValue();
-
-                    if (jsonValueMatched.toString().contains("{") && jsonValueMatched.toString().contains(",")) {
-
-                        Method method1 = clazzToObj.getMethod(mName);
-
-                        Object subClazzObj = toObj((String) jsonValueMatched, method1.getReturnType());
-                        String mSetterSub = "s" + mName.substring(1);
-                        Method methodSetterSub = clazzToObj.getMethod(mSetterSub, method.getReturnType());
-                        methodSetterSub.invoke(clazzObj, subClazzObj);
-                    } else {
-                        if (!jsonValueMatched.toString().contains("\"")) {
-                            if (jsonValueMatched.toString().equals("true") || jsonValueMatched.toString().equals("false")) {
-                                setValue = Boolean.valueOf((String) jsonValueMatched);
-                                //System.out.println("it is boolean and and ERROR is in Type");
-                            } else if (jsonValueMatched.toString().equals("null")) {
-                                setValue = null;
-                            } else if (jsonValueMatched.toString().contains("[") && jsonValueMatched.toString().contains("]")) {
-                                //System.out.println("It is Array and ERROR is in Type");
-                            } else if (jsonValueMatched.toString().contains("{")) {
-                                //System.out.println("Json Type ");
-                            } else {
-                                if (jsonValueMatched.toString().contains(".") || jsonValueMatched.toString().contains(",")) {
-                                    //System.out.println("number is float");
-                                    setValue = Float.parseFloat((String) jsonValueMatched);
-                                } else {
-                                    //System.out.println("It is Integer or number (int or float)");
-                                    setValue = Integer.parseInt((String) jsonValueMatched);
-                                }
-                            }
-                        } else if (jsonValueMatched.toString().contains("\"")) {
-                            jsonValueMatched = jsonValueMatched.toString().replaceAll("\"", "");
-                            setValue = jsonValueMatched;
-                            //System.out.println("String ");
-                        } // if JSON is Object
-                        else if (jsonValueMatched.toString().contains("{") && jsonValueMatched.toString().contains("}")) {
-                            //System.out.println("This is JSON OBJECT");
-                        } else {
-                            //System.out.println("Not defined Format");
-                        }
-                        String mSetter = "set" + fieldNameWithUpper;
-                        System.out.println("the last method name: " + method.getName());
-
-                        Method methodSetter = clazzToObj.getMethod(mSetter, method.getReturnType());
-                        methodSetter.invoke(clazzObj, setValue);
-                    }
                 }
             }
         }
 
         return clazzObj;
+    }
+
+    private static void doObjInvok(String mName, Map<String, Object> jsonKeyValueSplitted, Method method, Object clazzObj, Class clazzToObj) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException {
+        String fieldNameWithUpper = "";
+        if (mName.startsWith("get")) {
+            fieldNameWithUpper = mName.substring(3);
+        } else if (mName.startsWith("is")) {
+            fieldNameWithUpper = mName.substring(2);
+        }
+
+        String fieldName = fieldNameWithUpper.toLowerCase().charAt(0) + fieldNameWithUpper.substring(1);
+        Object setValue = new Object();
+
+        Object jsonValueMatched = jsonKeyValueSplitted.entrySet().stream().filter(eKey -> eKey.getKey().equals(fieldName)).findFirst()
+                .get().getValue();
+
+        if (jsonValueMatched.toString().contains("{") && jsonValueMatched.toString().contains(",")) {
+
+            Method method1 = clazzToObj.getMethod(mName);
+
+            Object subClazzObj = toObj((String) jsonValueMatched, method1.getReturnType());
+            String mSetterSub = "s" + mName.substring(1);
+            Method methodSetterSub = clazzToObj.getMethod(mSetterSub, method.getReturnType());
+            methodSetterSub.invoke(clazzObj, subClazzObj);
+        } else {
+            if (!jsonValueMatched.toString().contains("\"")) {
+                if (jsonValueMatched.toString().equals("true") || jsonValueMatched.toString().equals("false")) {
+                    setValue = Boolean.valueOf((String) jsonValueMatched);
+                    //System.out.println("it is boolean and and ERROR is in Type");
+                } else if (jsonValueMatched.toString().equals("null")) {
+                    setValue = null;
+                } else if (jsonValueMatched.toString().contains("[") && jsonValueMatched.toString().contains("]")) {
+                    //System.out.println("It is Array and ERROR is in Type");
+                } else if (jsonValueMatched.toString().contains("{")) {
+                    //System.out.println("Json Type ");
+                } else {
+                    if (jsonValueMatched.toString().contains(".") || jsonValueMatched.toString().contains(",")) {
+                        //System.out.println("number is float");
+                        setValue = Float.parseFloat((String) jsonValueMatched);
+                    } else {
+                        //System.out.println("It is Integer or number (int or float)");
+                        setValue = Integer.parseInt((String) jsonValueMatched);
+                    }
+                }
+            } else if (jsonValueMatched.toString().contains("\"")) {
+                jsonValueMatched = jsonValueMatched.toString().replaceAll("\"", "");
+                setValue = jsonValueMatched;
+                //System.out.println("String ");
+            } // if JSON is Object
+            else if (jsonValueMatched.toString().contains("{") && jsonValueMatched.toString().contains("}")) {
+                //System.out.println("This is JSON OBJECT");
+            } else {
+                //System.out.println("Not defined Format");
+            }
+            String mSetter = "set" + fieldNameWithUpper;
+            System.out.println("the last method name: " + method.getName());
+
+            Method methodSetter = clazzToObj.getMethod(mSetter, method.getReturnType());
+            methodSetter.invoke(clazzObj, setValue);
+        }
+
     }
 
     private static Map<String, Object> parseJsonWithoutNew(String jsonStringForObje) {
