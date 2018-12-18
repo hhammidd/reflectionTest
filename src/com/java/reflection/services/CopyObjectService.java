@@ -32,16 +32,32 @@ public class CopyObjectService {
         for (Method method : clazz.getDeclaredMethods()) {
             int nOfArgs = method.getParameterCount();
             String mName = method.getName();
-            if (!method.isAnnotationPresent(MyTransition.class) && mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3))) {
-                value = method.invoke(obj);
-                String mSetter = "s" + mName.substring(1);
-                Method methodSetter = clazz.getMethod(mSetter, method.getReturnType());
-                if (!(checkIsPrimitive(method))) {
-                    Object newSubObj = copy(value);
-                    methodSetter.invoke(newObj,newSubObj);
-                } else {
-                    methodSetter.invoke(newObj, value);
-                }
+
+            if (!method.isAnnotationPresent(MyTransition.class)) {
+                    if (mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3))) {
+                        value = method.invoke(obj);
+                        String mSetter = "s" + mName.substring(1);
+                        Method methodSetter = clazz.getMethod(mSetter, method.getReturnType());
+                        if (!(checkIsPrimitive(method))) {
+                            Object newSubObj = copy(value);
+                            methodSetter.invoke(newObj, newSubObj);
+                        } else {
+                            methodSetter.invoke(newObj, value);
+                        }
+                    }
+            } else if (!method.getAnnotation(MyTransition.class).value().equals("noAllJob") &&
+                    !method.getAnnotation(MyTransition.class).value().equals("noCopy")){
+                    if (mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3))) {
+                        value = method.invoke(obj);
+                        String mSetter = "s" + mName.substring(1);
+                        Method methodSetter = clazz.getMethod(mSetter, method.getReturnType());
+                        if (!(checkIsPrimitive(method))) {
+                            Object newSubObj = copy(value);
+                            methodSetter.invoke(newObj, newSubObj);
+                        } else {
+                            methodSetter.invoke(newObj, value);
+                        }
+                    }
             }
         }
         return newObj;

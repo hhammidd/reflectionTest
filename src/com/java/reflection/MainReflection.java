@@ -16,7 +16,7 @@ public class MainReflection {
         //TODO check for boolean--> . toObj
         Users users = new Users();
         users.setUserId(100);
-        users.setUserName("hamid");
+        users.setUserName("HAMID");
         users.setRegister(true);
         users.setUserAmount(1.02);
         //users.setExpirationDate(java.sql.Date.valueOf(LocalDate.now()));
@@ -48,5 +48,6 @@ public class MainReflection {
         ToObject toObject = new ToObject();
         Object strToObj2 = toObject.toObj(jsonStringForObje, clazzToObj);
         System.out.println(strToObj2);
+
     }
 }

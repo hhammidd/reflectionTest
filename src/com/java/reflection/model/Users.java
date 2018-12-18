@@ -18,6 +18,8 @@ public class Users {
     public Users() {
     }
 
+
+    @MyTransition("noToObj")
     public double getUserAmount() {
         return userAmount;
     }
@@ -34,6 +36,7 @@ public class Users {
         this.register = register;
     }
 
+    @MyTransition
     public int getUserId() {
         return userId;
     }
@@ -42,7 +45,6 @@ public class Users {
         this.userId = userId;
     }
 
-    @MyTransition
     public String getUserName() {
         return userName;
     }
@@ -50,6 +52,7 @@ public class Users {
     public void setUserName(String userName) {
         this.userName = userName;
     }
+
 
     public Company getCompany() {
         return company;
