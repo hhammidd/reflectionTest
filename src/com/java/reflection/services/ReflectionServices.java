@@ -4,12 +4,7 @@ import com.java.reflection.MyTransition;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static com.java.reflection.services.Utils.checkIsPrimitive;
+import java.util.*;
 
 public class ReflectionServices {
 
@@ -39,7 +34,7 @@ public class ReflectionServices {
                     }
                 }
             } else if (!method.getAnnotation(MyTransition.class).value().equals("noAllJob") &&
-                    !method.getAnnotation(MyTransition.class).value().equals("noCopy")){
+                    !method.getAnnotation(MyTransition.class).value().equals("noCopy")) {
                 if (!mName.equals("getClass") && mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3))) {
                     value = method.invoke(obj);
                     String mSetter = "s" + mName.substring(1);
@@ -54,6 +49,18 @@ public class ReflectionServices {
             }
         }
         return newObj;
+    }
+
+    private boolean checkIsPrimitive(Method method) {
+        Class<?> methodType = method.getReturnType();
+
+        if (!(methodType.isPrimitive() || methodType == Double.class || methodType == Float.class || methodType == Long.class ||
+                methodType == Integer.class || methodType == Short.class || methodType == Character.class ||
+                methodType == Byte.class || methodType == Boolean.class || methodType == String.class || methodType == Date.class)) {
+            //System.out.println("is Object");
+            return false;
+        }
+        return true;
     }
 
 
@@ -147,6 +154,7 @@ public class ReflectionServices {
 
     /**
      * Take the json String and set in Obj
+     *
      * @param jsonStringForObje
      * @param clazzToObj
      * @return
@@ -182,14 +190,14 @@ public class ReflectionServices {
             if (!mName.equals("getClass") && !method.isAnnotationPresent(MyTransition.class)) {
                 if (((mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3))) ||
                         mName.startsWith("is") && Character.isUpperCase(mName.charAt(2)))) {
-                    doObjInvok(mName,jsonKeyValueSplitted, method, clazzObj,clazzToObj);
+                    doObjInvok(mName, jsonKeyValueSplitted, method, clazzObj, clazzToObj);
                 }
 
-            }  else if (!mName.equals("getClass") && !method.getAnnotation(MyTransition.class).value().equals("noAllJob") &&
-                    !method.getAnnotation(MyTransition.class).value().equals("noToObj")){
+            } else if (!mName.equals("getClass") && !method.getAnnotation(MyTransition.class).value().equals("noAllJob") &&
+                    !method.getAnnotation(MyTransition.class).value().equals("noToObj")) {
                 if (((mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3))) ||
                         mName.startsWith("is") && Character.isUpperCase(mName.charAt(2)))) {
-                    doObjInvok(mName,jsonKeyValueSplitted, method, clazzObj,clazzToObj);
+                    doObjInvok(mName, jsonKeyValueSplitted, method, clazzObj, clazzToObj);
 
                 }
             }
@@ -403,5 +411,6 @@ public class ReflectionServices {
         infoJson.putAll(keyValueSplitedObj);
         return infoJson;
     }
+
 
 }
