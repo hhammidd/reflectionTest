@@ -57,7 +57,6 @@ public class ReflectionServices {
         if (!(methodType.isPrimitive() || methodType == Double.class || methodType == Float.class || methodType == Long.class ||
                 methodType == Integer.class || methodType == Short.class || methodType == Character.class ||
                 methodType == Byte.class || methodType == Boolean.class || methodType == String.class || methodType == Date.class)) {
-            //System.out.println("is Object");
             return false;
         }
         return true;
@@ -84,12 +83,10 @@ public class ReflectionServices {
                         fieldNameWithUpper = mName.substring(2);
                     }
 
-                    //todo
                     String fieldName = fieldNameWithUpper.toLowerCase().charAt(0) + fieldNameWithUpper.substring(1);
                     Method methodCall = clazz.getMethod(mName);
                     Object argFieldNew = methodCall.invoke(obj);
 
-                    //System.out.println(method.getReturnType());
                     if (!(checkIsPrimitive(method))) {
                         argFieldNew = toJson(argFieldNew);
                         //System.out.println(toJsonedFor);
@@ -119,7 +116,6 @@ public class ReflectionServices {
                         fieldNameWithUpper = mName.substring(2);
                     }
 
-                    //todo
                     String fieldName = fieldNameWithUpper.toLowerCase().charAt(0) + fieldNameWithUpper.substring(1);
                     Method methodCall = clazz.getMethod(mName);
                     Object argFieldNew = methodCall.invoke(obj);
@@ -140,7 +136,6 @@ public class ReflectionServices {
                         if (argFieldNew != null)
                             argFieldNew = "\"" + argFieldNew + "\"";
                     }
-                    // make the Json
                     toJsonedFor += "\"" + fieldName + "\": " + argFieldNew + ",";
                 }
             }
@@ -202,7 +197,6 @@ public class ReflectionServices {
                 }
             }
         }
-
         return clazzObj;
     }
 
@@ -232,7 +226,6 @@ public class ReflectionServices {
             if (!jsonValueMatched.toString().contains("\"")) {
                 if (jsonValueMatched.toString().equals("true") || jsonValueMatched.toString().equals("false")) {
                     setValue = Boolean.valueOf((String) jsonValueMatched);
-                    //System.out.println("it is boolean and and ERROR is in Type");
                 } else if (jsonValueMatched.toString().equals("null")) {
                     setValue = null;
                 } else if (jsonValueMatched.toString().contains("[") && jsonValueMatched.toString().contains("]")) {
@@ -241,17 +234,14 @@ public class ReflectionServices {
                     //System.out.println("Json Type ");
                 } else {
                     if (jsonValueMatched.toString().contains(".") || jsonValueMatched.toString().contains(",")) {
-                        //System.out.println("number is float");
                         setValue = Float.parseFloat((String) jsonValueMatched);
                     } else {
-                        //System.out.println("It is Integer or number (int or float)");
                         setValue = Integer.parseInt((String) jsonValueMatched);
                     }
                 }
             } else if (jsonValueMatched.toString().contains("\"")) {
                 jsonValueMatched = jsonValueMatched.toString().replaceAll("\"", "");
                 setValue = jsonValueMatched;
-                //System.out.println("String ");
             } // if JSON is Object
             else if (jsonValueMatched.toString().contains("{") && jsonValueMatched.toString().contains("}")) {
                 //System.out.println("This is JSON OBJECT");
@@ -301,7 +291,6 @@ public class ReflectionServices {
 
     private static List<String> doParsJson(String jsObj) {
         List<String> jsonList = new ArrayList<>();
-        //jsObj = "\"company\":{\"country\": \"IT\",\"id_company\": 1,\"name_company\": \"be\",\"city\":{\"city_id\": 1001,\"city_Name\": \"MILANO\"}}";
         while (true) {
             if (!(jsObj.contains(","))) {
                 jsonList.add(jsObj);
@@ -313,7 +302,6 @@ public class ReflectionServices {
                 String beforePrantesi = jsObj.substring(0, jsObj.indexOf("{") + 1);
 
                 if (firstJsonStringAnalysis.contains("{")) {
-
                     // if first include { --> ss:{c:d},hh:ff --> cut the before prantezi
                     // result --> c:d},hh:ff
                     String jsonStringRest = jsObj.substring(jsObj.indexOf("{") + 1);
@@ -327,7 +315,6 @@ public class ReflectionServices {
                             equalPrantezi -= 1;
                         }
                         if (equalPrantezi == 0) {
-                            //jsObj = "\"company\":{\"country\": \"IT\",\"city\":{\"city_Name\": \"MILANO\",\"city_id\": 1001},\"id_company\": 1,\"name_company\": \"be\"}";
                             // k is position of closed prantezi --> jsonRest: -->c:d},hh:ff --> for cutting it from rest
                             // finalJson is total json include value
                             finalJson = beforePrantesi + jsonStringRest.substring(0, k + 1);
@@ -364,10 +351,7 @@ public class ReflectionServices {
                 }
             }
         }
-
-
     }
-
 
     /**
      * put key of Json in key Map and value in value of Hash map
@@ -380,7 +364,6 @@ public class ReflectionServices {
         Map<String, Object> keyValueSplitedObj = new HashMap<>();
 
         String fieldNameRow = "";
-
         for (String keyValues : keyValueSplited) {
             Object[] splitSubVir = null;
             if (!keyValues.contains("{") && !keyValues.contains(",")) {
@@ -396,8 +379,6 @@ public class ReflectionServices {
                 String keyOfObjectProperty = keyValues.substring(1, keyValues.indexOf(":") - 1).trim();
                 String valueObjectProperty = keyValues.substring(keyValues.indexOf(":") + 1);
                 //valueObjectProperty = valueObjectProperty + "}";
-
-
                 keyValueSplitedObj.put(keyOfObjectProperty, valueObjectProperty);
 
             }
