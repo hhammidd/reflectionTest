@@ -9,7 +9,152 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ToObject {
+import static com.java.reflection.services.Utils.checkIsPrimitive;
+
+public class ReflectionServices {
+
+    public Object copy(Object obj) throws NoSuchFieldException,
+            IllegalAccessException, InvocationTargetException,
+            NoSuchMethodException, InstantiationException {
+
+        Class clazz = obj.getClass();
+        Object newObj = clazz.newInstance();
+
+        Object value = new Object();
+        for (Method method : clazz.getMethods()) {
+            int nOfArgs = method.getParameterCount();
+            String mName = method.getName();
+
+            if (!method.isAnnotationPresent(MyTransition.class)) {
+                if (mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3)) &&
+                        !mName.equals("getClass")) {
+                    value = method.invoke(obj);
+                    String mSetter = "s" + mName.substring(1);
+                    Method methodSetter = clazz.getMethod(mSetter, method.getReturnType());
+                    if (!(checkIsPrimitive(method))) {
+                        Object newSubObj = copy(value);
+                        methodSetter.invoke(newObj, newSubObj);
+                    } else {
+                        methodSetter.invoke(newObj, value);
+                    }
+                }
+            } else if (!method.getAnnotation(MyTransition.class).value().equals("noAllJob") &&
+                    !method.getAnnotation(MyTransition.class).value().equals("noCopy")){
+                if (!mName.equals("getClass") && mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3))) {
+                    value = method.invoke(obj);
+                    String mSetter = "s" + mName.substring(1);
+                    Method methodSetter = clazz.getMethod(mSetter, method.getReturnType());
+                    if (!(checkIsPrimitive(method))) {
+                        Object newSubObj = copy(value);
+                        methodSetter.invoke(newObj, newSubObj);
+                    } else {
+                        methodSetter.invoke(newObj, value);
+                    }
+                }
+            }
+        }
+        return newObj;
+    }
+
+
+    public String toJson(Object obj) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        Class clazz = obj.getClass();
+        String toJsoned = "{";
+        String toJsonedFor = "";
+
+        for (Method method : clazz.getMethods()) {
+            int nOfArgs = method.getParameterCount();
+            String mName = method.getName();
+
+            if (!mName.equals("getClass") && !method.isAnnotationPresent(MyTransition.class)) {
+                if (((mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3))) ||
+                        mName.startsWith("is") && Character.isUpperCase(mName.charAt(2)))) {
+
+                    String fieldNameWithUpper = "";
+                    if (mName.startsWith("get")) {
+                        fieldNameWithUpper = mName.substring(3);
+                    } else if (mName.startsWith("is")) {
+                        fieldNameWithUpper = mName.substring(2);
+                    }
+
+                    //todo
+                    String fieldName = fieldNameWithUpper.toLowerCase().charAt(0) + fieldNameWithUpper.substring(1);
+                    Method methodCall = clazz.getMethod(mName);
+                    Object argFieldNew = methodCall.invoke(obj);
+
+                    //System.out.println(method.getReturnType());
+                    if (!(checkIsPrimitive(method))) {
+                        argFieldNew = toJson(argFieldNew);
+                        //System.out.println(toJsonedFor);
+                    } else if (method.getReturnType().equals(Integer.TYPE)) {
+
+                    } else if (method.getReturnType().equals(Boolean.TYPE)) {
+
+                    } else if (method.getReturnType().equals(Double.TYPE)) {
+
+                    } else if (method.getReturnType().equals(Float.TYPE)) {
+
+                    } else {
+                        if (argFieldNew != null)
+                            argFieldNew = "\"" + argFieldNew + "\"";
+                    }
+                    // make the Json
+                    toJsonedFor += "\"" + fieldName + "\": " + argFieldNew + ",";
+                }
+            } else if (!mName.equals("getClass") && !method.getAnnotation(MyTransition.class).value().equals("noAllJob") &&
+                    !method.getAnnotation(MyTransition.class).value().equals("noJson")) {
+                if (((mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3))) ||
+                        mName.startsWith("is") && Character.isUpperCase(mName.charAt(2)))) {
+                    String fieldNameWithUpper = "";
+                    if (mName.startsWith("get")) {
+                        fieldNameWithUpper = mName.substring(3);
+                    } else if (mName.startsWith("is")) {
+                        fieldNameWithUpper = mName.substring(2);
+                    }
+
+                    //todo
+                    String fieldName = fieldNameWithUpper.toLowerCase().charAt(0) + fieldNameWithUpper.substring(1);
+                    Method methodCall = clazz.getMethod(mName);
+                    Object argFieldNew = methodCall.invoke(obj);
+
+                    //System.out.println(method.getReturnType());
+                    if (!(checkIsPrimitive(method))) {
+                        argFieldNew = toJson(argFieldNew);
+                        //System.out.println(toJsonedFor);
+                    } else if (method.getReturnType().equals(Integer.TYPE)) {
+
+                    } else if (method.getReturnType().equals(Boolean.TYPE)) {
+
+                    } else if (method.getReturnType().equals(Double.TYPE)) {
+
+                    } else if (method.getReturnType().equals(Float.TYPE)) {
+
+                    } else {
+                        if (argFieldNew != null)
+                            argFieldNew = "\"" + argFieldNew + "\"";
+                    }
+                    // make the Json
+                    toJsonedFor += "\"" + fieldName + "\": " + argFieldNew + ",";
+                }
+            }
+
+        }
+        toJsoned += toJsonedFor.substring(0, toJsonedFor.length() - 1);
+        toJsoned = toJsoned + "}";
+        return toJsoned;
+    }
+
+
+    /**
+     * Take the json String and set in Obj
+     * @param jsonStringForObje
+     * @param clazzToObj
+     * @return
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     * @throws NoSuchMethodException
+     * @throws InvocationTargetException
+     */
     public static Object toObj(String jsonStringForObje, Class clazzToObj) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         Object clazzObj = clazzToObj.newInstance();
         //jsonKeyValueSplitted --> is a map of keys and values of json... value can be a json also.
@@ -36,7 +181,7 @@ public class ToObject {
             //TODO do with get
             if (!mName.equals("getClass") && !method.isAnnotationPresent(MyTransition.class)) {
                 if (((mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3))) ||
-                       mName.startsWith("is") && Character.isUpperCase(mName.charAt(2)))) {
+                        mName.startsWith("is") && Character.isUpperCase(mName.charAt(2)))) {
                     doObjInvok(mName,jsonKeyValueSplitted, method, clazzObj,clazzToObj);
                 }
 

@@ -4,9 +4,7 @@ import com.java.reflection.model.AdminUser;
 import com.java.reflection.model.City;
 import com.java.reflection.model.Company;
 import com.java.reflection.model.Users;
-import com.java.reflection.services.CopyObjectService;
-import com.java.reflection.services.ToJsonService;
-import com.java.reflection.services.ToObject;
+import com.java.reflection.services.ReflectionServices;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -33,37 +31,32 @@ public class MainReflection {
         users.setCompany(company);
 
         //Question 1
-        CopyObjectService copyObjectService = new CopyObjectService();
-        //Object objNew = copyObjectService.copy(users);
+        ReflectionServices reflectionServices = new ReflectionServices();
+        Object objNew = reflectionServices.copy(users);
         //System.out.println(objNew);
 
         //Question 3
-        ToJsonService toJsonService = new ToJsonService();
-        //String jsonStringForObje = toJsonService.toJson(users);
-        //System.out.println("Json is:---> " + jsonStringForObje);
+        String jsonStringForObje = reflectionServices.toJson(users);
+        System.out.println("Json is:---> " + jsonStringForObje);
 
         //Question 2 public <T> T toObj(String json,Class<T> cls){
         Users companyClass = new Users();
         //jsonStringForObje = "{\"register\": false,\"userName\": \"hamid\",\"userId\": 100,\"userAmount\": 1.02,\"company\": {\"country\": \"IT\",\"id_company\": 1,\"name_company\": \"be\",\"city\": {\"city_Name\": \"MILANO\",\"city_id\": 1001}}}";
         Class clazzToObj = companyClass.getClass();
-        ToObject toObject = new ToObject();
-        //Object strToObj2 = toObject.toObj(jsonStringForObje, clazzToObj);
-        //System.out.println(strToObj2);
+        Object strToObj2 = reflectionServices.toObj(jsonStringForObje, clazzToObj);
+        System.out.println(strToObj2);
 
         //TODO new Example
-        CopyObjectService copyObjectService1 = new CopyObjectService();
-        ToJsonService toJsonService1 = new ToJsonService();
-        ToObject toObject1 = new ToObject();
         AdminUser adminUser = new AdminUser();
 
         adminUser.setAdminLevel(2);
         adminUser.setFirstName("hamid");
         adminUser.setLastName("shafie");
 
-        AdminUser ac = (AdminUser) copyObjectService.copy(adminUser);
-        System.out.println(toJsonService.toJson(adminUser));
+        AdminUser ac = (AdminUser) reflectionServices.copy(adminUser);
+        System.out.println(reflectionServices.toJson(adminUser));
 
-        AdminUser aj = (AdminUser) ToObject.toObj("{\"firstName\":\"hamid\",\"lastName\":\"shafie\",\"adminLevel\":3}", AdminUser.class);
+        AdminUser aj = (AdminUser) ReflectionServices.toObj("{\"firstName\":\"hamid\",\"lastName\":\"shafie\",\"adminLevel\":3}", AdminUser.class);
         System.out.println(aj);
     }
 }

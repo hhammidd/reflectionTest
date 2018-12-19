@@ -45,7 +45,7 @@ public class Users {
         this.userId = userId;
     }
 
-    @MyTransition("noToObj")
+    @MyTransition
     public String getUserName() {
         return userName;
     }
