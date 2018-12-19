@@ -334,13 +334,7 @@ public class ReflectionServices {
                             jsonList.add(finalJson);
                             // TODO sometimes go to the error
                             // TODO you add { } object json , You will have after that 1. Nothing or ,
-                            System.out.println("The Error is parsing this jsObj Is : " + jsObj);
-                            System.out.println("The finalJson is : " + finalJson);
-                            System.out.println("===Compare length ====jsonObj> " + jsObj.length() + " ====final length: " + finalJson.length());
-                            //jsObj = "\"city\":{\"city_id\": 1001,\"city_Name\": \"MILANO\"}}";
-                            //finalJson = "\"city\":{\"city_id\": 1001,\"city_Name\": \"MILANO\"}";
                             if (jsObj.length() - 1 > finalJson.length()) {
-                                System.out.println("finalJson is Cutted Here: --> should not");
                                 jsObj = jsObj.substring(finalJson.length() + 1);
                             } else {
                                 return jsonList;
