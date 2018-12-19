@@ -22,21 +22,13 @@ public class ToJsonService {
         String toJsoned = "{";
         String toJsonedFor = "";
 
-        for (Method method : clazz.getDeclaredMethods()) {
+        for (Method method : clazz.getMethods()) {
             int nOfArgs = method.getParameterCount();
             String mName = method.getName();
-            //TODO put value for anno
-            if (method.isAnnotationPresent(MyTransition.class)) {
-                if (method.getAnnotation(MyTransition.class).value().equals("noJson")) {
-                    System.out.println(method.getAnnotation(MyTransition.class).value());
-                } else
-                    System.out.println(method.getAnnotation(MyTransition.class).value());
 
-            }
-
-            if (!method.isAnnotationPresent(MyTransition.class)) {
+            if (!mName.equals("getClass") && !method.isAnnotationPresent(MyTransition.class)) {
                 if (((mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3))) ||
-                        mName.startsWith("is") && Character.isUpperCase(mName.charAt(2)))) {
+                          mName.startsWith("is") && Character.isUpperCase(mName.charAt(2)))) {
 
                     String fieldNameWithUpper = "";
                     if (mName.startsWith("get")) {
@@ -69,7 +61,8 @@ public class ToJsonService {
                     // make the Json
                     toJsonedFor += "\"" + fieldName + "\": " + argFieldNew + ",";
                 }
-            } else if (!method.getAnnotation(MyTransition.class).value().equals("noAllJob") && !method.getAnnotation(MyTransition.class).value().equals("noJson")) {
+            } else if (!mName.equals("getClass") && !method.getAnnotation(MyTransition.class).value().equals("noAllJob") &&
+                    !method.getAnnotation(MyTransition.class).value().equals("noJson")) {
                 if (((mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3))) ||
                         mName.startsWith("is") && Character.isUpperCase(mName.charAt(2)))) {
                 String fieldNameWithUpper = "";

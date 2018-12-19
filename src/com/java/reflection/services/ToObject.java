@@ -30,17 +30,17 @@ public class ToObject {
     private static Object objectValueInvoker(Map<String, Object> jsonKeyValueSplitted, Class clazzToObj) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
 
         Object clazzObj = clazzToObj.newInstance();
-        for (Method method : clazzToObj.getDeclaredMethods()) {
+        for (Method method : clazzToObj.getMethods()) {
             int nOfArgs = method.getParameterCount();
             String mName = method.getName();
             //TODO do with get
-            if (!method.isAnnotationPresent(MyTransition.class)) {
+            if (!mName.equals("getClass") && !method.isAnnotationPresent(MyTransition.class)) {
                 if (((mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3))) ||
-                        mName.startsWith("is") && Character.isUpperCase(mName.charAt(2)))) {
+                       mName.startsWith("is") && Character.isUpperCase(mName.charAt(2)))) {
                     doObjInvok(mName,jsonKeyValueSplitted, method, clazzObj,clazzToObj);
                 }
 
-            }  else if (!method.getAnnotation(MyTransition.class).value().equals("noAllJob") &&
+            }  else if (!mName.equals("getClass") && !method.getAnnotation(MyTransition.class).value().equals("noAllJob") &&
                     !method.getAnnotation(MyTransition.class).value().equals("noToObj")){
                 if (((mName.startsWith("get") && nOfArgs == 0 && Character.isUpperCase(mName.charAt(3))) ||
                         mName.startsWith("is") && Character.isUpperCase(mName.charAt(2)))) {
